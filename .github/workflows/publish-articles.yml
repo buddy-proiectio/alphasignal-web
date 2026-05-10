@@ -32,14 +32,9 @@ jobs:
 
           echo "POST_FILE_PATH=$FILE_NAME" >> $GITHUB_ENV
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip3 install -r requirements.txt
           playwright install --with-deps chromium
 
       - name: Publish to Substack
@@ -48,7 +43,7 @@ jobs:
         run: |
           mkdir -p substack
           echo '${{ secrets.SUBSTACK_STATE_JSON }}' > substack/state.json
-          python substack/publish.py
+          python3 substack/publish.py
 
       - name: Upload Debug Screenshots
         if: failure()
