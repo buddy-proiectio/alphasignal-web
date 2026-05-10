@@ -117,32 +117,45 @@ def main():
         page = context.new_page()
 
         try:
-            print("Navigating to Substack editor...")
-            # Firefox handles Cloudflare challenges differently
-            page.goto(NEW_POST_URL, wait_until="domcontentloaded")
+            # 1. Homepage first to pass Cloudflare and stabilize session
+            print("Navigating to Substack homepage first...")
+            page.goto("https://substack.com")
 
-            # Wait for Cloudflare challenge to resolve
-            print(f"Initial URL: {page.url}")
+            # Check for Cloudflare on homepage
             if (
                 "just a moment" in page.title().lower()
                 or "verification" in page.title().lower()
             ):
-                print(
-                    "Cloudflare detected. Waiting up to 60 seconds for challenge resolution..."
-                )
-                for i in range(60):
+                print("Cloudflare detected on homepage. Waiting for resolution...")
+                for i in range(30):
                     page.wait_for_timeout(1000)
-                    # Check for editor elements or title change
-                    if (
-                        page.locator(TITLE_INPUT_SELECTOR).count() > 0
-                        or "just a moment" not in page.title().lower()
-                    ):
-                        print(f"Bypassed Cloudflare successfully (at {i}s)!")
+                    if "just a moment" not in page.title().lower():
+                        print(f"Bypassed Cloudflare on homepage (at {i}s)!")
                         break
-                    if i % 10 == 0:
-                        print(
-                            f"Still waiting... ({i}s) - Current Title: {page.title()}"
-                        )
+
+            # 2. Navigate to Substack editor
+            print("Navigating to Substack editor...")
+            page.goto(NEW_POST_URL)
+
+            # Check for Cloudflare on editor page
+            print(f"Initial Editor URL: {page.url}")
+            for i in range(60):
+                title = page.title().lower()
+                # 'Just a moment', 'Loading', 'Verification' - when the title does not change
+                if (
+                    "just a moment" not in title
+                    and "loading" not in title
+                    and "verification" not in title
+                ):
+                    if page.locator(TITLE_INPUT_SELECTOR).count() > 0:
+                        print(f"Reached editor successfully (at {i}s)!")
+                        break
+
+                if i % 10 == 0:
+                    print(
+                        f"Waiting for editor to load... ({i}s) - Current Title: {page.title()}"
+                    )
+                page.wait_for_timeout(1000)
 
             print(f"Final URL: {page.url}")
             # Wait for the page to settle after Cloudflare challenge
