@@ -25,9 +25,10 @@ jobs:
           FILE_NAME=$(basename "$FILE_PATH")
           echo "Downloading $FILE_PATH from buddy-core..."
 
-          gh api -H "Accept: application/vnd.github.v3.raw" \
-                 "/repos/taevel02/buddy-core/contents/$FILE_PATH" \
-                 > "$FILE_NAME"
+          curl -L -H "Authorization: Bearer $GH_TOKEN" \
+               -H "Accept: application/vnd.github.v3.raw" \
+               "https://api.github.com/repos/taevel02/buddy-core/contents/$FILE_PATH" \
+               -o "$FILE_NAME"
 
           echo "POST_FILE_PATH=$FILE_NAME" >> $GITHUB_ENV
 
