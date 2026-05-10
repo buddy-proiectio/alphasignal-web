@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+venv/
+env/
+.venv/
+
+# Playwright State Files
+state.json
+substack/state.json
+naver-premium/state.json
+naverpremium/state.json
+
+# Downloaded Markdown Files
+*.md

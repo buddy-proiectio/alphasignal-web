@@ -1,0 +1,108 @@
+name: Publish to Substack and Naver Premium
+
+on:
+  repository_dispatch:
+    types: [publish-article]
+
+jobs:
+  publish-substack:
+    name: Publish to Substack
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout publish scripts
+        uses: actions/checkout@v4
+
+      - name: Download Markdown File from buddy-core
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          FILE_PATH="${{ github.event.client_payload.file_path }}"
+          if [ -z "$FILE_PATH" ]; then
+            echo "Error: file_path not provided in client_payload"
+            exit 1
+          fi
+
+          FILE_NAME=$(basename "$FILE_PATH")
+          echo "Downloading $FILE_PATH from buddy-core..."
+
+          # Use the contents API endpoint to fetch the file
+          gh api -H "Accept: application/vnd.github.v3.raw" \
+                 "/repos/taevel02/buddy-core/contents/$FILE_PATH" \
+                 > "$FILE_NAME"
+
+          echo "POST_FILE_PATH=$FILE_NAME" >> $GITHUB_ENV
+
+          echo "Downloaded file content preview:"
+          head -n 5 "$FILE_NAME" || true
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Publish to Substack
+        env:
+          POST_FILE_PATH: ${{ env.POST_FILE_PATH }}
+        run: |
+          mkdir -p substack
+          # Restore Playwright session state from secret
+          echo '${{ secrets.SUBSTACK_STATE_JSON }}' > substack/state.json
+
+          # Run the Substack publish script
+          python substack/publish.py
+
+  # publish-naver:
+  #   name: Publish to Naver Premium
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout publish scripts
+  #       uses: actions/checkout@v4
+
+  #     - name: Download Markdown File from buddy-core
+  #       env:
+  #         GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+  #       run: |
+  #         FILE_PATH="${{ github.event.client_payload.file_path }}"
+  #         if [ -z "$FILE_PATH" ]; then
+  #           echo "Error: file_path not provided in client_payload"
+  #           exit 1
+  #         fi
+
+  #         FILE_NAME=$(basename "$FILE_PATH")
+  #         echo "Downloading $FILE_PATH from buddy-core..."
+
+  #         # Use the contents API endpoint to fetch the file
+  #         gh api -H "Accept: application/vnd.github.v3.raw" \
+  #                "/repos/taevel02/buddy-core/contents/$FILE_PATH" \
+  #                > "$FILE_NAME"
+
+  #         echo "POST_FILE_PATH=$FILE_NAME" >> $GITHUB_ENV
+
+  #         echo "Downloaded file content preview:"
+  #         head -n 5 "$FILE_NAME" || true
+
+  #     - name: Set up Python 3.12
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+
+  #     - name: Install dependencies
+  #       run: |
+  #         pip install -r requirements.txt
+  #         playwright install --with-deps chromium
+
+  #     - name: Publish to Naver Premium
+  #       env:
+  #         POST_FILE_PATH: ${{ env.POST_FILE_PATH }}
+  #       run: |
+  #         mkdir -p naver-premium
+  #         # echo '${{ secrets.NAVER_STATE_JSON }}' > naver-premium/state.json
+
+  #         # Run the Naver Premium publish script (Currently Disabled)
+  #         # python naver-premium/publish.py
+  #         echo "Naver Premium pipeline is currently disabled as per instructions."
