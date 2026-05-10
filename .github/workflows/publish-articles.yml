@@ -42,7 +42,13 @@ jobs:
           POST_FILE_PATH: ${{ env.POST_FILE_PATH }}
         run: |
           mkdir -p substack
-          echo '${{ secrets.SUBSTACK_STATE_JSON }}' > substack/state.json
+          # If local state.json exists, use it. Otherwise, restore from GitHub Secret.
+          if [ ! -f substack/state.json ]; then
+            echo "Local state.json not found. Restoring from GitHub Secret..."
+            echo '${{ secrets.SUBSTACK_STATE_JSON }}' > substack/state.json
+          else
+            echo "Using existing local state.json to maintain session continuity."
+          fi
           python3 substack/publish.py
 
       - name: Upload Debug Screenshots

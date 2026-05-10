@@ -162,6 +162,11 @@ def main():
 
             print("Successfully executed Substack publishing flow!")
 
+            # --- Refresh Session State ---
+            # Save the latest session state to the local file to prevent expiration
+            context.storage_state(path=STATE_FILE)
+            print(f"Session state updated and saved to {STATE_FILE}")
+
         except Exception as e:
             print(f"Failed to publish to Substack: {e}")
             page.screenshot(path="error_screen.png")
