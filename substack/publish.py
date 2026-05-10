@@ -10,21 +10,15 @@ NEW_POST_URL = "https://therawtape.substack.com/publish/post"
 TITLE_INPUT_SELECTOR = "[data-testid='post-title']"
 BODY_INPUT_SELECTOR = ".ProseMirror"
 PUBLISH_PANEL_BUTTON = "[data-testid='publish-button']"  # The 'Continue' button
-TAGS_INPUT_SELECTOR = (
-    "input[placeholder*='Select or create tags' i], input[placeholder*='tag' i]"
-)
-META_DESC_TEXTAREA = (
-    "textarea[placeholder*='description' i], textarea[placeholder*='Subtitle' i]"
-)
 CONFIRM_PUBLISH_BUTTON = "button:has-text('Send to paid subscribers now'), button:has-text('Send to everyone now')"
-PAYWALL_BUTTON_SELECTOR = "button[aria-label='Paywall']"
 
 STATE_FILE = "substack/state.json"
 
 
 def main():
     # 1. Retrieve the markdown file path
-    file_path = os.environ.get("POST_FILE_PATH")
+    # file_path = os.environ.get("POST_FILE_PATH") # TODO
+    file_path = "./alpha_signal_20260509_test_en.md"
     if not file_path:
         print("Error: POST_FILE_PATH environment variable is not set.")
         sys.exit(1)
@@ -123,75 +117,12 @@ def main():
         page = context.new_page()
 
         try:
-            # 1. Homepage first to pass Cloudflare and stabilize session
-            print("Navigating to Substack homepage first...")
-            page.goto("https://substack.com")
-
-            # Check for Cloudflare on homepage
-            print(f"Homepage Title: {page.title()}")
-            for i in range(45):
-                title = page.title().lower()
-                if "just a moment" not in title and "verification" not in title:
-                    print(f"Bypassed Cloudflare on homepage (at {i}s)!")
-                    break
-                page.wait_for_timeout(1000)
-
-            # 2. Navigate to Substack editor
             print("Navigating to Substack editor...")
             page.goto(NEW_POST_URL)
 
-            # Check for Cloudflare on editor page
-            print(f"Initial Editor URL: {page.url}")
-            for i in range(60):
-                title = page.title().lower()
-                if (
-                    "just a moment" not in title
-                    and "loading" not in title
-                    and "verification" not in title
-                ):
-                    if page.locator(TITLE_INPUT_SELECTOR).count() > 0:
-                        print(f"Reached editor successfully (at {i}s)!")
-                        break
-
-                if i % 10 == 0:
-                    print(
-                        f"Waiting for editor to load... ({i}s) - Current Title: {page.title()}"
-                    )
-                page.wait_for_timeout(1000)
-
-            print(f"Final URL: {page.url}")
-            # Wait for the page to settle after Cloudflare challenge
-            print("Waiting for page to settle after challenge...")
-            page.wait_for_timeout(5000)
-            page.screenshot(path="after_cloudflare.png")
-
             # --- Title ---
             print("Entering title...")
-            try:
-                # Check what elements are on the page before looking for the title element
-                has_prosemirror = page.locator(".ProseMirror").count() > 0
-                has_publish_btn = (
-                    page.locator("[data-testid='publish-button']").count() > 0
-                )
-                print(
-                    f"Diagnostics - Has ProseMirror: {has_prosemirror}, Has Publish Button: {has_publish_btn}"
-                )
-
-                page.wait_for_selector(
-                    TITLE_INPUT_SELECTOR, state="visible", timeout=30000
-                )
-            except Exception as e:
-                print(f"Timeout occurred at URL: {page.url}")
-                print(f"Page Title at failure: {page.title()}")
-                page.screenshot(path="error_screen.png")
-                # Print part of the page source (for debugging)
-                body_content = page.content()
-                if "post-title" in body_content:
-                    print(
-                        "Found 'post-title' in HTML but not visible/clickable via selector."
-                    )
-                raise e
-
+            page.wait_for_selector(TITLE_INPUT_SELECTOR, state="visible", timeout=30000)
             page.fill(TITLE_INPUT_SELECTOR, title)
 
             # --- Body (Rich Text) ---
@@ -200,8 +131,6 @@ def main():
 
             # Paste Content
             print("Pasting content...")
-            # We use execCommand('insertHTML') because it natively integrates with ProseMirror's event system
-            # without requiring OS-level clipboard permissions or complex key bindings.
             page.evaluate(
                 "(html) => { document.execCommand('insertHTML', false, html); }",
                 html_content,
@@ -211,39 +140,32 @@ def main():
             # --- Publish Settings Modal ---
             print("Opening publish panel...")
             page.click(PUBLISH_PANEL_BUTTON)
-            page.wait_for_timeout(4000)  # Wait for animation
+            page.wait_for_timeout(4000)
 
             # --- Tags ---
             print("Entering tags...")
-            # Tags are added in the publish panel, which appears after clicking 'Continue'
             TAGS_INPUT_SELECTOR = "input[placeholder*='Select or create tags' i], input[placeholder*='tag' i]"
             page.wait_for_selector(TAGS_INPUT_SELECTOR, state="visible", timeout=10000)
-
-            # Click once to focus
             page.click(TAGS_INPUT_SELECTOR)
             page.wait_for_timeout(500)
 
             for tag in tags:
-                # Type using keyboard to avoid selector failure when placeholder disappears
                 page.keyboard.type(tag, delay=50)
                 page.wait_for_timeout(1000)
                 page.keyboard.press("Enter")
                 page.wait_for_timeout(1000)
 
-            # Note: We skip the meta description step here since we already filled the Subtitle field on the main editor page.
-
             # --- Confirm Publish ---
             print("Clicking final publish button...")
-            page.wait_for_selector(CONFIRM_PUBLISH_BUTTON, state="visible")
             page.click(CONFIRM_PUBLISH_BUTTON)
+            page.wait_for_timeout(5000)
 
-            # Wait to ensure the publish request completes
-            page.wait_for_timeout(10000)
             print("Successfully executed Substack publishing flow!")
 
         except Exception as e:
             print(f"Failed to publish to Substack: {e}")
-            sys.exit(1)
+            page.screenshot(path="error_screen.png")
+            raise e
         finally:
             browser.close()
 

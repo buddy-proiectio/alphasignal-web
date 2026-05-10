@@ -7,7 +7,7 @@ on:
 jobs:
   publish-substack:
     name: Publish to Substack
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout publish scripts
         uses: actions/checkout@v4
@@ -25,15 +25,11 @@ jobs:
           FILE_NAME=$(basename "$FILE_PATH")
           echo "Downloading $FILE_PATH from buddy-core..."
 
-          # Use the contents API endpoint to fetch the file
           gh api -H "Accept: application/vnd.github.v3.raw" \
                  "/repos/taevel02/buddy-core/contents/$FILE_PATH" \
                  > "$FILE_NAME"
 
           echo "POST_FILE_PATH=$FILE_NAME" >> $GITHUB_ENV
-
-          echo "Downloaded file content preview:"
-          head -n 5 "$FILE_NAME" || true
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -43,8 +39,6 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          sudo apt-get update
-          sudo apt-get install -y xvfb
           playwright install --with-deps chromium
 
       - name: Publish to Substack
@@ -52,11 +46,8 @@ jobs:
           POST_FILE_PATH: ${{ env.POST_FILE_PATH }}
         run: |
           mkdir -p substack
-          # Restore Playwright session state from secret
           echo '${{ secrets.SUBSTACK_STATE_JSON }}' > substack/state.json
-
-          # Run the Substack publish script using xvfb for headful mode bypass
-          xvfb-run --auto-servernum --server-args="-screen 0 1280x800x24" python substack/publish.py
+          python substack/publish.py
 
       - name: Upload Debug Screenshots
         if: failure()
