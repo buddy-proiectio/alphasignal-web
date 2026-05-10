@@ -157,16 +157,36 @@ def main():
                         )
 
             print(f"Final URL: {page.url}")
+            # Wait for the page to settle after Cloudflare challenge
+            print("Waiting for page to settle after challenge...")
+            page.wait_for_timeout(5000)
+            page.screenshot(path="after_cloudflare.png")
 
             # --- Title ---
             print("Entering title...")
             try:
+                # Check what elements are on the page before looking for the title element
+                has_prosemirror = page.locator(".ProseMirror").count() > 0
+                has_publish_btn = (
+                    page.locator("[data-testid='publish-button']").count() > 0
+                )
+                print(
+                    f"Diagnostics - Has ProseMirror: {has_prosemirror}, Has Publish Button: {has_publish_btn}"
+                )
+
                 page.wait_for_selector(
                     TITLE_INPUT_SELECTOR, state="visible", timeout=30000
                 )
             except Exception as e:
                 print(f"Timeout occurred at URL: {page.url}")
+                print(f"Page Title at failure: {page.title()}")
                 page.screenshot(path="error_screen.png")
+                # Print part of the page source (for debugging)
+                body_content = page.content()
+                if "post-title" in body_content:
+                    print(
+                        "Found 'post-title' in HTML but not visible/clickable via selector."
+                    )
                 raise e
 
             page.fill(TITLE_INPUT_SELECTOR, title)
