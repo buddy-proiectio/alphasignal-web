@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import markdown
+import httpx
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 
@@ -18,6 +19,8 @@ STATE_FILE = "substack/state.json"
 def main():
     # 1. Retrieve the markdown file path
     file_path = os.environ.get("POST_FILE_PATH")
+    if not file_path:
+        file_path = "./sample.md"
     if not file_path:
         print("Error: POST_FILE_PATH environment variable is not set.")
         sys.exit(1)
@@ -36,7 +39,7 @@ def main():
     post_date = date_match.group(1) if date_match else "Unknown Date"
 
     # 3. Extract Topline Signals Tags (e.g. "- **Alphabet**:")
-    tags = re.findall(r"-\s+\*\*([^\*]+)\*\*", content)
+    tags = re.findall(r"[-*]\s+\*\*([^\*]+)\*\*", content)
     # Ensure we limit to 3 tags max based on the requirement
     tags = tags[:3]
     tags_str = ", ".join(tags)
@@ -45,26 +48,57 @@ def main():
     title = f"{post_date} - The Daily Tape ({tags_str})"
     meta_desc = f"Today's market signals on {tags_str}."[:160]
 
-    # --- Smart Meta Description Generation (No LLM) ---
-    topline_match = re.search(
-        r"\*\*Topline Signals\*\*\n\n(.*?)\n\n", content, re.DOTALL | re.IGNORECASE
-    )
-    if topline_match:
-        topline_text = topline_match.group(1).strip()
-        bullets = re.findall(r"- \*\*(.*?)\*\*: (.*)", topline_text)
-        desc_parts = []
-        for company, text in bullets[:2]:
-            clean_text = re.sub(r"[\*_]", "", text)
-            # Find the first sentence (until a period)
-            sentence = clean_text.split(".")[0].strip()
-            desc_parts.append(f"{company}: {sentence}")
-        fallback_desc = " | ".join(desc_parts)
-        if fallback_desc:
-            if len(fallback_desc) > 155:
-                # Truncate elegantly without breaking words
-                meta_desc = fallback_desc[:152].rsplit(" ", 1)[0] + "..."
-            else:
-                meta_desc = fallback_desc
+    # --- SEO Meta Description Generation using Ollama (Llama 3.1) ---
+    try:
+        # Focus on the Topline Signals section and extract first 3 bullets
+        topline_match = re.search(
+            r"Topline Signals(.*?)(?=Daily Point|$)", content, re.DOTALL | re.IGNORECASE
+        )
+        if topline_match:
+            topline_text = topline_match.group(1).strip()
+            # Extract bullet points: "- **Company**: Text"
+            bullets = re.findall(r"[-*] \*\*(.*?)\*\*: (.*)", topline_text)
+            # Take up to 3 bullets and join them
+            text_to_summarize = "\n".join([f"- {c}: {t}" for c, t in bullets[:3]])
+        else:
+            text_to_summarize = content[:1000]
+
+        print("Generating SEO Meta Description using Ollama (llama3.1)...")
+        prompt = f"""
+            Task: Based on the extracted Topline Signals, generate a single SEO Meta Description for today's Substack post.
+
+            Topline Signals:
+            {text_to_summarize}
+
+            Constraints:
+            - Length: Strictly between 140 and 160 characters (including spaces).
+            - Content: Include the top 2 or 3 company names or macro indicators, and exactly 2 hard numbers (e.g., percentages, dollar amounts).
+            - Tone: Cold, objective, data-driven. Do NOT use clickbait words (e.g., "shocking", "must read", "discover").
+            - Format: Return ONLY the description text. No quotes, no intro, no conversational filler.
+        """
+
+        with httpx.Client(timeout=60.0) as client:
+            response = client.post(
+                "http://localhost:11434/api/generate",
+                json={
+                    "model": "llama3.1",
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "num_ctx": 2048,
+                        "temperature": 0.3,
+                        "num_predict": 100,
+                    },
+                },
+            )
+            response.raise_for_status()
+            result = response.json()
+            # Clean up the output: remove quotes and extra whitespace
+            meta_desc = result["response"].strip().replace('"', "")
+
+    except Exception as e:
+        print(f"Ollama generation failed, falling back: {e}")
+        meta_desc = f"Today's market signals on {tags_str}."
 
     # 5. Extract Body (From "### Daily Point" to the end)
     body_match = re.search(r"###\s+Daily\s+Point(.*)", content, re.DOTALL)
@@ -153,6 +187,40 @@ def main():
                 page.wait_for_timeout(1000)
                 page.keyboard.press("Enter")
                 page.wait_for_timeout(1000)
+
+            # --- Social Preview & Description ---
+            print("Opening Social Preview modal...")
+            try:
+                # Click Social Preview area (stable ID)
+                page.wait_for_selector("#socialPreview", state="visible", timeout=10000)
+                page.click("#socialPreview")
+                page.wait_for_timeout(1000)
+
+                # Fill the description textarea in the modal
+                print("Entering description in Social Preview modal...")
+                description_selector = "textarea#description"
+                page.wait_for_selector(
+                    description_selector, state="visible", timeout=10000
+                )
+                page.fill(description_selector, "")
+                page.fill(description_selector, meta_desc)
+                page.wait_for_timeout(1000)
+
+                # Click 'Save' to save changes
+                print("Saving Social Preview changes...")
+                # Using a combination of text and the primary button class for robustness
+                # Ensure we wait for the button to be enabled (not [disabled])
+                save_button_selector = 'button.priority_primary-RfbeYt:has-text("Save")'
+                page.wait_for_selector(
+                    f"{save_button_selector}:not([disabled])",
+                    state="visible",
+                    timeout=15000,
+                )
+                page.click(save_button_selector)
+                page.wait_for_timeout(2000)
+            except Exception as e:
+                print(f"Failed to enter description via Social Preview: {e}")
+                pass
 
             # --- Confirm Publish ---
             print("Clicking final publish button...")
