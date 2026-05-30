@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout publish scripts
         uses: actions/checkout@v4
+        with:
+          clean: false
 
       - name: Download Markdown File from buddy-core
         env:
@@ -32,10 +34,16 @@ jobs:
 
           echo "POST_FILE_PATH=$FILE_NAME" >> $GITHUB_ENV
 
-      - name: Install dependencies
+      - name: Setup environment if not exists
         run: |
-          pip3 install --break-system-packages -r requirements.txt
-          playwright install chromium
+          if [ ! -d ".venv" ]; then
+            echo "First time setup: Creating virtual environment..."
+            uv venv
+            uv pip install -r requirements.txt
+            uv run playwright install chromium
+          else
+            echo "Virtual environment already exists. Skipping setup."
+          fi
 
       - name: Publish to Substack
         env:
@@ -49,4 +57,5 @@ jobs:
           else
             echo "Using existing local state.json to maintain session continuity."
           fi
-          python3 substack/publish.py
+
+          uv run python substack/publish.py
