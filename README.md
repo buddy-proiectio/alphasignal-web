@@ -7,22 +7,28 @@ This project uses `watchdog` to monitor report outputs (`core/data/report`, `cor
 ## Quick Start
 
 ### 1. Install Dependencies
+
 This project uses [uv](https://github.com/astral-sh/uv) as its package manager.
+
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ### 2. Authentication Setup
+
 Before running the background service, you need to manually log in to Naver once so the script can save your session to bypass captchas. Place your `state.json` inside the `src/` directory.
 
 ### 3. Background Daemon (macOS)
+
 Install the `launchd` service so the monitor script runs reliably in the background, even after system reboots.
+
 ```bash
-cd ~/workspaces/buddy/publisher
-./install.sh
+cd ./publisher && ./install.sh
 ```
 
 ## Logs
+
 Output logs and errors from the background daemon will be streamed to:
+
 - `stdout.log`
 - `stderr.log`
