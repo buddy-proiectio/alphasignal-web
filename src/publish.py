@@ -2,7 +2,6 @@ import os
 import re
 import sys
 import markdown
-from typing import Tuple
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 
@@ -17,18 +16,30 @@ CONFIRM_PUBLISH_BUTTON = "button:has-text('발행하기')"
 STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
 
 
-def process_markdown_content(content: str) -> str:
-    """Removes '### Daily Point' sections and appends a disclaimer."""
-    pattern = r"(###\s+(?:Daily Point|데일리 포인트).*?)(?=\n##|\Z)"
-    cleaned_content = re.sub(pattern, "", content, flags=re.DOTALL | re.IGNORECASE)
+def process_markdown_content(content: str, file_path: str) -> str:
+    """Cuts content based on report type and appends a disclaimer."""
+    is_premarket = "premarket" in file_path.lower()
+
+    if is_premarket:
+        # Cut everything before the first `[`
+        idx = content.find("[")
+        if idx != -1:
+            content = content[idx:]
+    else:
+        # Cut everything before `### Weekly Schedule` / `### 주간 일정`
+        match = re.search(
+            r"(###\s+(?:Weekly Schedule|주간 일정))", content, re.IGNORECASE
+        )
+        if match:
+            content = content[match.start() :]
 
     disclaimer = "\n\n---\n❇︎ 중요 안내사항 ❇︎\n1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.\n2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.\n3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.\n4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.\n5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.\n6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
 
-    return cleaned_content.strip() + disclaimer
+    return content.strip() + disclaimer
 
 
-def extract_metadata(content: str, file_path: str) -> Tuple[str, str]:
-    """Extracts date and tags to generate the title."""
+def extract_metadata(file_path: str) -> str:
+    """Extracts date from filename to generate the title."""
     # Extract date from filename (e.g. 20260712)
     date_match = re.search(r"(\d{4})(\d{2})(\d{2})", file_path)
     if date_match:
@@ -47,10 +58,7 @@ def extract_metadata(content: str, file_path: str) -> Tuple[str, str]:
 
     title = base_title if is_korean else f"{base_title} (EN)"
 
-    tags = re.findall(r"[-*]\s+\*\*([^\*]+)\*\*", content)[:3]
-    tags_str = ", ".join(tags)
-
-    return title, tags_str
+    return title
 
 
 def read_markdown_file(file_path: str) -> str:
@@ -149,10 +157,10 @@ def main():
     content = read_markdown_file(file_path)
     print(f"Loaded Markdown: {file_path}")
 
-    title, tags_str = extract_metadata(content, file_path)
-    print(f"Title: {title}\nTags: {tags_str}")
+    title = extract_metadata(file_path)
+    print(f"Title: {title}")
 
-    raw_body = process_markdown_content(content)
+    raw_body = process_markdown_content(content, file_path)
     html_content = markdown.markdown(raw_body, extensions=["tables"]).replace("\n", "")
 
     publish_to_naver(title, html_content)
