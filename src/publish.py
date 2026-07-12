@@ -7,10 +7,10 @@ from playwright_stealth import Stealth
 
 # --- Configuration ---
 NEW_POST_URL = "https://studio.premium.naver.com/post"
-TITLE_INPUT_SELECTOR = "span.se-fs32.__se-node"
+TITLE_INPUT_SELECTOR = "span.se-fs32.__se-node, .se-title-text, [placeholder*='제목']"
 BODY_INPUT_SELECTOR = "span.se-placeholder.se-fs15, .se-main-container"
-PAYWALL_BUTTON = ".se-l-document-toolbar > ul > li:nth-child(19) > button"
-NEXT_BUTTON = "#nextBtn"
+PAYWALL_BUTTON = ".se-l-document-toolbar button[title*='유료'], .se-l-document-toolbar > ul > li:nth-child(19) > button"
+NEXT_BUTTON = "#nextBtn, button:has-text('다음')"
 STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
 
 
@@ -117,10 +117,13 @@ def publish_to_naver(title: str, html_content: str):
 
             print("Clicking '텍스트' (Text content) button...")
             try:
-                page.click("text='텍스트'", timeout=5000)
+                page.wait_for_selector("text='텍스트'", state="visible", timeout=10000)
+                # 텍스트 버튼을 클릭하면 새로운 url(/post/write)로 넘어가므로 대기합니다.
+                with page.expect_navigation(timeout=15000):
+                    page.click("text='텍스트'")
                 page.wait_for_timeout(3000)
             except Exception as e:
-                print("Could not find '텍스트' button, proceeding anyway. Error:", e)
+                print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
 
             print("Entering title...")
             try:
