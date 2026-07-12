@@ -127,10 +127,11 @@ def publish_to_naver(title: str, html_content: str):
 
             print("Entering title...")
             try:
-                # 비어있는 span 태그는 크기가 0이라 visible 체크에 실패할 수 있으므로 attached로 대기
                 page.wait_for_selector(TITLE_INPUT_SELECTOR, state="attached", timeout=15000)
-                page.click(TITLE_INPUT_SELECTOR, force=True)
-                page.keyboard.type(title)
+                page.locator(TITLE_INPUT_SELECTOR).first.focus()
+                page.wait_for_timeout(500)
+                # 사람이 입력하는 것처럼 딜레이를 주어 리액트 상태 업데이트를 유도
+                page.keyboard.type(title, delay=100)
             except Exception as e:
                 print("Could not enter title. Error:", e)
 
@@ -146,7 +147,7 @@ def publish_to_naver(title: str, html_content: str):
 
             try:
                 page.wait_for_selector(BODY_INPUT_SELECTOR, state="attached", timeout=10000)
-                page.click(BODY_INPUT_SELECTOR, force=True)
+                page.locator(BODY_INPUT_SELECTOR).first.focus()
                 page.wait_for_timeout(500)
                 page.keyboard.press("Meta+V")  # Cmd+V on mac, Ctrl+V on windows
                 page.wait_for_timeout(2000)
