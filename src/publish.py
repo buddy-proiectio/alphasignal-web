@@ -7,9 +7,9 @@ from playwright_stealth import Stealth
 
 # --- Configuration ---
 NEW_POST_URL = "https://studio.premium.naver.com/post"
-TITLE_INPUT_SELECTOR = ".se-ff-nanumgothic.se-fs32.__se-node, .se-documentTitle, .se-title-text"
-BODY_INPUT_SELECTOR = ".se-placeholder.__se_placeholder.se-ff-nanumgothic.se-fs15, .se-main-container"
-PAYWALL_BUTTON = ".se-l-document-toolbar > ul > li:nth-child(19) > button"
+TITLE_INPUT_SELECTOR = ".se-title-text span.__se-node"
+BODY_INPUT_SELECTOR = ".se-section-text span.__se-node"
+PAYWALL_BUTTON = ".se-paywall-toolbar-button"
 NEXT_BUTTON = "#nextBtn"
 STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
 
@@ -123,12 +123,27 @@ def publish_to_naver(title: str, html_content: str):
             except Exception as e:
                 print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
 
+            # 에디터 iframe 대기 및 로케이터 생성
+            print("Locating editor iframe...")
+            try:
+                page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
+                editor_frame = page.frame_locator("iframe[src*='editor']")
+            except Exception as e:
+                print("Failed to locate editor iframe. Operating on main page instead.", e)
+                # Fallback to main page locator (which will likely fail but prevents crash)
+                editor_frame = page # type: ignore
+
             print("Entering title...")
             try:
-                page.wait_for_selector(TITLE_INPUT_SELECTOR, state="attached", timeout=15000)
-                page.locator(TITLE_INPUT_SELECTOR).first.focus()
+                # 1. 먼저 타이틀 영역을 한번 클릭해 에디터 포커스를 깨움
+                editor_frame.locator(".se-title-text").first.click(force=True)
                 page.wait_for_timeout(500)
-                # 사람이 입력하는 것처럼 딜레이를 주어 리액트 상태 업데이트를 유도
+                
+                # 2. 실제 contenteditable span에 포커스 후 타이핑
+                title_loc = editor_frame.locator(TITLE_INPUT_SELECTOR).first
+                title_loc.wait_for(state="attached", timeout=15000)
+                title_loc.focus()
+                page.wait_for_timeout(500)
                 page.keyboard.type(title, delay=100)
             except Exception as e:
                 print("Could not enter title. Error:", e)
@@ -144,26 +159,34 @@ def publish_to_naver(title: str, html_content: str):
             page.evaluate(clipboard_injection_js)
 
             try:
-                page.wait_for_selector(BODY_INPUT_SELECTOR, state="attached", timeout=10000)
-                page.locator(BODY_INPUT_SELECTOR).first.focus()
+                # 1. 본문 영역을 한번 클릭해 커서 위치시킴
+                editor_frame.locator(".se-section-text").first.click(force=True)
                 page.wait_for_timeout(500)
-                page.keyboard.press("Meta+V")  # Cmd+V on mac, Ctrl+V on windows
+                
+                # 2. 실제 contenteditable span에 포커스 후 붙여넣기
+                body_loc = editor_frame.locator(BODY_INPUT_SELECTOR).first
+                body_loc.wait_for(state="attached", timeout=10000)
+                body_loc.focus()
+                page.wait_for_timeout(500)
+                page.keyboard.press("Meta+V")  # Cmd+V on mac
                 page.wait_for_timeout(2000)
             except Exception as e:
                 print("Failed to paste into body:", e)
 
             print("Inserting paywall...")
             try:
-                page.wait_for_selector(PAYWALL_BUTTON, state="attached", timeout=5000)
-                page.click(PAYWALL_BUTTON, force=True)
+                paywall_loc = editor_frame.locator(PAYWALL_BUTTON).first
+                paywall_loc.wait_for(state="attached", timeout=5000)
+                paywall_loc.click(force=True)
                 page.wait_for_timeout(1000)
             except Exception as e:
                 print("Could not click paywall button:", e)
 
             print("Clicking next button...")
             try:
-                page.wait_for_selector(NEXT_BUTTON, state="attached", timeout=5000)
-                page.click(NEXT_BUTTON, force=True)
+                next_loc = editor_frame.locator(NEXT_BUTTON).first
+                next_loc.wait_for(state="attached", timeout=5000)
+                next_loc.click(force=True)
                 page.wait_for_timeout(3000)
                 print("Proceeded to next step!")
             except Exception as e:
