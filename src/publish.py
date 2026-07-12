@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import json
 import markdown
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
@@ -103,9 +104,11 @@ def read_markdown_file(file_path: str) -> str:
 
 def paste_rich_text(page, html_content: str):
     """Writes HTML content to clipboard and simulates paste command."""
+    # Use json.dumps to safely escape newlines and quotes for JavaScript injection
+    escaped_html = json.dumps(html_content)
     clipboard_injection_js = f"""
     async () => {{
-        const blob = new Blob([`{html_content}`], {{ type: 'text/html' }});
+        const blob = new Blob([{escaped_html}], {{ type: 'text/html' }});
         const data = [new ClipboardItem({{ 'text/html': blob }})];
         await navigator.clipboard.write(data);
     }}
@@ -114,7 +117,7 @@ def paste_rich_text(page, html_content: str):
     page.keyboard.press("Meta+V")
 
 
-def publish_to_naver(title: str, free_html: str, paid_html: str):
+def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: bool = True):
     """Executes the Playwright publishing flow with paywall splitting."""
     with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
@@ -238,6 +241,13 @@ def publish_to_naver(title: str, free_html: str, paid_html: str):
             context.storage_state(path=STATE_FILE)
             print("Session state refreshed successfully.")
 
+            if keep_alive:
+                print("\n============================================================")
+                print("Browser is kept open for manual review/publishing.")
+                print("Press [Enter] in this terminal to close the browser...")
+                print("============================================================\n")
+                input()
+
         except Exception as e:
             print(f"Failed to publish to Naver Premium: {e}")
             raise e
@@ -256,11 +266,11 @@ def main():
     raw_body = process_markdown_content(content, file_path)
     free_markdown, paid_markdown = split_markdown_by_paywall(raw_body, file_path)
 
-    # Render Markdown to HTML and compress newlines
-    free_html = markdown.markdown(free_markdown, extensions=["tables"]).replace("\n", "")
-    paid_html = markdown.markdown(paid_markdown, extensions=["tables"]).replace("\n", "") if paid_markdown else ""
+    # Render Markdown to HTML (keep newlines for proper block parsing)
+    free_html = markdown.markdown(free_markdown, extensions=["tables"])
+    paid_html = markdown.markdown(paid_markdown, extensions=["tables"]) if paid_markdown else ""
 
-    publish_to_naver(title, free_html, paid_html)
+    publish_to_naver(title, free_html, paid_html, keep_alive=True)
 
 
 if __name__ == "__main__":
