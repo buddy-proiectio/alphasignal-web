@@ -1,18 +1,19 @@
+# Environments
+.venv/
+.env
+
+# Playwright / Naver state
+naver-premium/state.json
+.publish_state.json
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.env
-venv/
-env/
-.venv/
+*.so
 
-# Playwright State Files
-state.json
-substack/state.json
-naver-premium/state.json
-naverpremium/state.json
+# Logs
+*.log
 
-# Downloaded Markdown Files
-*.md
-!README.md
+# uv
+uv.lock
