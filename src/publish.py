@@ -339,26 +339,24 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             except Exception as e:
                 print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
 
-            # Smart Page-Level Editor Auto-Detection Logic
-            print("Checking if editor is loaded on the main page...")
+            # Smart Editor Frame Resolution Logic (Waiting for visible iframe)
+            print("Checking if editor is loaded directly on the main page...")
             page.wait_for_timeout(3000)
             
             if page.locator(".se-component, .se-title-text").count() > 0:
                 print("Editor detected directly on the main page.")
                 editor_frame = page
             else:
-                print("Editor not detected on main page. Resolving editor iframe...")
+                print("Editor not detected on main page. Resolving visible editor iframe...")
                 try:
-                    page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
-                    editor_frame = page.frame(url=re.compile(r"editor"))
+                    # Wait for the iframe element to be attached and visible on the screen
+                    iframe_handle = page.wait_for_selector("iframe[src*='editor']", state="visible", timeout=20000)
+                    if not iframe_handle:
+                        raise Exception("Failed to locate visible iframe element.")
+                    editor_frame = iframe_handle.content_frame()
                     if not editor_frame:
-                        for frame in page.frames:
-                            if "editor" in frame.url or "editor" in frame.name:
-                                editor_frame = frame
-                                break
-                    if not editor_frame:
-                        print("Failed to resolve iframe object. Falling back to page context.")
-                        editor_frame = page
+                        raise Exception("content_frame() returned None.")
+                    print("Successfully resolved editor iframe.")
                 except Exception as e:
                     print("Failed to locate editor iframe. Operating on main page instead.", e)
                     editor_frame = page  # type: ignore
@@ -500,7 +498,8 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             # Proceed to Settings
             print("Clicking next button...")
             try:
-                next_loc = editor_frame.locator(NEXT_BUTTON).first
+                # Find and click next button on the main page context
+                next_loc = page.locator(NEXT_BUTTON).first
                 next_loc.wait_for(state="attached", timeout=5000)
                 next_loc.click(force=True)
                 page.wait_for_timeout(1000)
