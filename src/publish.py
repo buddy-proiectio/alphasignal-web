@@ -214,10 +214,18 @@ def paste_below_heading(page, editor_frame, target_type: str, target_name: str, 
             const elements = Array.from(document.querySelectorAll('.se-component'));
             
             if (type === 'heading') {
-                const index = elements.findIndex(el => {
+                // Try exact match first to prevent matching articles containing keyword
+                let index = elements.findIndex(el => {
                     const text = el.textContent.trim().toLowerCase();
-                    return names.some(name => text.includes(name.toLowerCase()));
+                    return names.some(name => text === name.toLowerCase());
                 });
+                // Fallback to substring matching if exact match not found
+                if (index === -1) {
+                    index = elements.findIndex(el => {
+                        const text = el.textContent.trim().toLowerCase();
+                        return names.some(name => text.includes(name.toLowerCase()));
+                    });
+                }
                 return (index !== -1 && index < elements.length - 1) ? index + 1 : -1;
             } else if (type === 'paywall') {
                 const index = elements.findIndex(el => 
@@ -241,13 +249,26 @@ def paste_below_heading(page, editor_frame, target_type: str, target_name: str, 
     target_block = editor_frame.locator(".se-component").nth(target_idx)
     target_block.wait_for(state="attached", timeout=5000)
     
-    # Click to focus
-    target_block.click(force=True)
-    page.wait_for_timeout(500)
-    
-    span_loc = target_block.locator("span.__se-node, [contenteditable='true']").first
-    span_loc.wait_for(state="attached", timeout=5000)
-    span_loc.focus()
+    # Focus and programmatically collapse cursor range to the start of the targeted block inside iframe
+    editor_frame.evaluate(
+        """(idx) => {
+            const elements = Array.from(document.querySelectorAll('.se-component'));
+            const block = elements[idx];
+            if (!block) return;
+            
+            const el = block.querySelector('.se-text-paragraph, p') || block;
+            el.focus();
+            
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            range.collapse(true); // collapse to start of paragraph
+            
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }""",
+        target_idx
+    )
     page.wait_for_timeout(1000)
     
     # Write to clipboard and paste
@@ -317,11 +338,19 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
             except Exception as e:
                 print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
 
-            # Wait for editor iframe and construct FrameLocator
+            # Wait for editor iframe and construct Frame
             print("Locating editor iframe...")
             try:
                 page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
-                editor_frame = page.frame_locator("iframe[src*='editor']")
+                # Retrieve actual Frame object (instead of FrameLocator) to support .evaluate()
+                editor_frame = page.frame(url=re.compile(r"editor"))
+                if not editor_frame:
+                    for frame in page.frames:
+                        if "editor" in frame.url or "editor" in frame.name:
+                            editor_frame = frame
+                            break
+                if not editor_frame:
+                    raise Exception("Could not resolve Frame object from URL/name.")
             except Exception as e:
                 print("Failed to locate editor iframe. Operating on main page instead.", e)
                 editor_frame = page  # type: ignore
@@ -465,19 +494,19 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
                 context.storage_state(path=STATE_FILE)
                 print("Session state refreshed successfully.")
 
+                # Locate publish button to verify existence, but DO NOT click (keep commented out as requested)
+                print("Locating publish button...")
+                publish_btn = page.locator(PUBLISH_BUTTON).first
+                publish_btn.wait_for(state="visible", timeout=5000)
+                print("Publish button successfully located and verified!")
+                # publish_btn.click()  # Kept commented out as requested
+
                 if keep_alive:
                     print("\n============================================================")
                     print("Browser is kept open for manual review/publishing.")
-                    print("Press [Enter] in this terminal to close the browser (or Publish)...")
+                    print("Press [Enter] in this terminal to close the browser...")
                     print("============================================================\n")
                     input()
-                else:
-                    print("Publishing post...")
-                    publish_btn = page.locator(PUBLISH_BUTTON).first
-                    publish_btn.wait_for(state="visible", timeout=5000)
-                    publish_btn.click()
-                    page.wait_for_timeout(3000)
-                    print("Successfully published!")
 
             except Exception as e:
                 print("Could not click next button or proceed.", e)
