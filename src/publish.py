@@ -13,6 +13,21 @@ PAYWALL_BUTTON = ".se-paywall-toolbar-button"
 NEXT_BUTTON = "#nextBtn"
 STATE_FILE = os.path.join(os.path.dirname(__file__), ".naver_session.json")
 
+# Canonical mapping of regular report categories to their English/Korean aliases in templates
+CATEGORY_MAP = {
+    "Weekly Schedule": ["Weekly Schedule", "주간 일정", "주간일정"],
+    "General": ["General", "경제 일반", "경제일반", "뉴스 일반"],
+    "Bitcoin": ["Bitcoin", "비트코인"],
+    "Semiconductor": ["Semiconductor", "반도체"],
+    "AI / Robotics / EV": ["AI / Robotics / EV", "AI / 로봇 / EV", "AI/로봇/EV", "AI/Robotics/EV"],
+    "Power / Grid": ["Power / Grid", "Power/Grid", "전력 / 인프라", "전력/인프라", "전력 인프라"],
+    "Software": ["Software", "소프트웨어"],
+    "Aerospace": ["Aerospace", "우주 항공", "우주항공"],
+    "Bio": ["Bio", "바이오"],
+    "Consumer / Retail": ["Consumer / Retail", "Consumer/Retail", "소비재 / 리테일", "소비재/리테일", "소비재 리테일"],
+    "Others": ["Others", "기타"]
+}
+
 
 def process_markdown_content(content: str, file_path: str) -> str:
     """Cuts content based on report type and appends a disclaimer."""
@@ -25,6 +40,8 @@ def process_markdown_content(content: str, file_path: str) -> str:
             content = content[idx:]
     else:
         # Cut everything before `### Weekly Schedule` / `### 주간 일정`
+        # For dynamic parsing, we keep Daily Point in the file but slice before Weekly Schedule here.
+        # Daily Point is essentially ignored during regular reports since we start from Weekly Schedule.
         match = re.search(
             r"(###\s+(?:Weekly Schedule|주간 일정))", content, re.IGNORECASE
         )
@@ -86,35 +103,45 @@ def markdown_to_naver_html(md_text: str) -> str:
 
 
 def extract_regular_sections(content: str) -> dict[str, str]:
-    """Splits regular report content into sub-sections and strips the disclaimer."""
+    """Dynamically splits markdown content by category headers in CATEGORY_MAP."""
     sections = {}
     
-    dp_match = re.search(r"###\s+Daily\s+Point", content, re.IGNORECASE)
-    ws_match = re.search(r"###\s+(?:Weekly\s+Schedule|주간\s+일정)", content, re.IGNORECASE)
-    gen_match = re.search(r"###\s+(?:General|경제\s+일반)", content, re.IGNORECASE)
+    # Flatten all alias names into a single list
+    all_aliases = []
+    for aliases in CATEGORY_MAP.values():
+        all_aliases.extend(aliases)
+    escaped_aliases = [re.escape(alias) for alias in all_aliases]
     
-    if dp_match and ws_match:
-        sections["Daily Point"] = content[dp_match.end():ws_match.start()].strip()
-    else:
-        sections["Daily Point"] = ""
+    # Match '### Heading Name'
+    heading_pattern = r"(?:^|\n)(###\s+(?:" + "|".join(escaped_aliases) + r"))(?=\s|$|\n)"
+    matches = list(re.finditer(heading_pattern, content, re.IGNORECASE))
+    
+    for i, match in enumerate(matches):
+        full_header = match.group(1)
+        matched_name = re.sub(r"^###\s+", "", full_header).strip()
         
-    if ws_match and gen_match:
-        sections["Weekly Schedule"] = content[ws_match.end():gen_match.start()].strip()
-    else:
-        sections["Weekly Schedule"] = ""
+        # Resolve to canonical category key
+        category_key = None
+        for key, aliases in CATEGORY_MAP.items():
+            if any(alias.lower() == matched_name.lower() for alias in aliases):
+                category_key = key
+                break
+                
+        if not category_key:
+            continue
+            
+        start_idx = match.end()
+        end_idx = matches[i+1].start() if i + 1 < len(matches) else len(content)
+        body = content[start_idx:end_idx].strip()
         
-    if gen_match:
-        gen_content = content[gen_match.end():].strip()
-        disc_idx = gen_content.find("❇︎ 중요 안내사항")
-        if disc_idx != -1:
-            delim_idx = gen_content.rfind("---", 0, disc_idx)
-            if delim_idx != -1:
-                gen_content = gen_content[:delim_idx].strip()
-            else:
-                gen_content = gen_content[:disc_idx].strip()
-        sections["General"] = gen_content
-    else:
-        sections["General"] = ""
+        # Strip disclaimer if last section
+        if i + 1 == len(matches):
+            disc_idx = body.find("❇︎ 중요 안내사항")
+            if disc_idx != -1:
+                delim_idx = body.rfind("---", 0, disc_idx)
+                body = body[:delim_idx].strip() if delim_idx != -1 else body[:disc_idx].strip()
+                
+        sections[category_key] = body
         
     return sections
 
@@ -133,10 +160,7 @@ def extract_premarket_sections(content: str) -> dict[str, str]:
         disc_idx = paid_content.find("❇︎ 중요 안내사항")
         if disc_idx != -1:
             delim_idx = paid_content.rfind("---", 0, disc_idx)
-            if delim_idx != -1:
-                paid_content = paid_content[:delim_idx].strip()
-            else:
-                paid_content = paid_content[:disc_idx].strip()
+            paid_content = paid_content[:delim_idx].strip() if delim_idx != -1 else paid_content[:disc_idx].strip()
         sections["Paid"] = paid_content
     else:
         sections["Paid"] = ""
@@ -162,12 +186,8 @@ def paste_below_heading(page, editor_frame, target_type: str, target_name: str, 
     
     # Map target heading names to lists of potential matching texts in templates
     search_names = [target_name]
-    if target_name == "Daily Point":
-        search_names = ["Daily Point", "데일리 포인트"]
-    elif target_name == "Weekly Schedule":
-        search_names = ["Weekly Schedule", "주간 일정", "주간일정"]
-    elif target_name == "General":
-        search_names = ["General", "경제 일반", "경제일반", "뉴스 일반"]
+    if target_name in CATEGORY_MAP:
+        search_names = CATEGORY_MAP[target_name]
     elif target_name == "장전 뉴스":
         search_names = ["장전 뉴스", "장전뉴스"]
 
@@ -343,11 +363,17 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
                 editor_frame.locator(".se-title-text").first.click(force=True)
                 page.wait_for_timeout(500)
 
-                # 2. Focus the exact contenteditable span and type
+                # 2. Focus the exact contenteditable span
                 title_loc = editor_frame.locator(TITLE_INPUT_SELECTOR).first
                 title_loc.wait_for(state="attached", timeout=15000)
                 title_loc.focus()
                 page.wait_for_timeout(500)
+                
+                # 3. Clear existing title template placeholder using JavaScript
+                title_loc.evaluate("el => el.textContent = ''")
+                page.wait_for_timeout(200)
+                
+                # 4. Type the new title
                 page.keyboard.type(title, delay=100)
             except Exception as e:
                 print("Could not enter title. Error:", e)
@@ -359,13 +385,10 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
                 if "Paid" in html_sections:
                     paste_below_heading(page, editor_frame, "paywall", "paywall", html_sections["Paid"])
             else:
-                # Regular Report: Daily Point, Weekly Schedule, General
-                if "Daily Point" in html_sections:
-                    paste_below_heading(page, editor_frame, "heading", "Daily Point", html_sections["Daily Point"])
-                if "Weekly Schedule" in html_sections:
-                    paste_below_heading(page, editor_frame, "heading", "Weekly Schedule", html_sections["Weekly Schedule"])
-                if "General" in html_sections:
-                    paste_below_heading(page, editor_frame, "heading", "General", html_sections["General"])
+                # Regular Report: Loop over CATEGORY_MAP keys to paste in template order
+                for category_key in CATEGORY_MAP.keys():
+                    if category_key in html_sections:
+                        paste_below_heading(page, editor_frame, "heading", category_key, html_sections[category_key])
 
             print("Clicking next button...")
             try:
