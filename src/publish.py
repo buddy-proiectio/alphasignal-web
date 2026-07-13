@@ -31,38 +31,9 @@ def process_markdown_content(content: str, file_path: str) -> str:
         if match:
             content = content[match.start() :]
 
-    disclaimer = "\n\n---\n<h2>❇︎ 중요 안내사항 ❇︎</h2><br />1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.<br />2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.<br />3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.<br />4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.<br />5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.<br />6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
+    disclaimer = "\n\n---\n❇︎ 중요 안내사항 ❇︎<br />1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.<br />2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.<br />3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.<br />4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.<br />5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.<br />6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
 
     return content.strip() + disclaimer
-
-
-def split_markdown_by_paywall(content: str, file_path: str) -> tuple[str, str]:
-    """Splits markdown into free and paid parts based on report type."""
-    is_premarket = "premarket" in file_path.lower()
-
-    if is_premarket:
-        # Premarket: Split below the first article.
-        # Since the header is already removed, content starts directly with the first article.
-        parts = content.split("\n\n")
-        if len(parts) > 1:
-            free_markdown = parts[0]
-            paid_markdown = "\n\n".join(parts[1:])
-        else:
-            free_markdown = content
-            paid_markdown = ""
-    else:
-        # Regular report: Split above "### General" or "### 경제 일반"
-        pattern = r"(\n*###\s+(?:General|경제 일반))"
-        match = re.search(pattern, content, re.IGNORECASE)
-        if match:
-            split_idx = match.start()
-            free_markdown = content[:split_idx]
-            paid_markdown = content[split_idx:]
-        else:
-            free_markdown = content
-            paid_markdown = ""
-
-    return free_markdown.strip(), paid_markdown.strip()
 
 
 def extract_metadata(file_path: str) -> str:
@@ -88,8 +59,20 @@ def extract_metadata(file_path: str) -> str:
     return title
 
 
-def inject_inline_styles(html: str) -> str:
-    """Injects inline CSS styles to preserve formatting when pasted into Naver Editor."""
+def markdown_to_naver_html(md_text: str) -> str:
+    """Converts markdown to HTML, replacing paragraph tags with double br tags for clean Naver blocks."""
+    html = markdown.markdown(md_text, extensions=["tables"])
+    
+    # Remove outer <p> wrappers and replace paragraph junctions with double breaks
+    if html.startswith("<p>") and html.endswith("</p>"):
+        html = html[3:-4]
+    html = html.replace("</p>\n<p>", "<br /><br />")
+    
+    # Map <h3> to <h2> because Naver SmartEditor ONE maps <h2> to Heading blocks
+    # while <h3> is stripped down to plain text.
+    html = html.replace("<h3>", "<h2>").replace("</h3>", "</h2>")
+    
+    # Inject inline styles to preserve formatting
     # Headings formatting (large, bold, with margins)
     html = html.replace("<h2>", "<h2 style='font-size: 20px; font-weight: bold; margin-top: 24px; margin-bottom: 12px; line-height: 1.4; color: #111111;'>")
     
@@ -99,7 +82,65 @@ def inject_inline_styles(html: str) -> str:
     # Link formatting
     html = html.replace("<a ", "<a style='color: #0066cc; text-decoration: underline;' ")
     
-    return html
+    return html.strip()
+
+
+def extract_regular_sections(content: str) -> dict[str, str]:
+    """Splits regular report content into sub-sections and strips the disclaimer."""
+    sections = {}
+    
+    dp_match = re.search(r"###\s+Daily\s+Point", content, re.IGNORECASE)
+    ws_match = re.search(r"###\s+(?:Weekly\s+Schedule|주간\s+일정)", content, re.IGNORECASE)
+    gen_match = re.search(r"###\s+(?:General|경제\s+일반)", content, re.IGNORECASE)
+    
+    if dp_match and ws_match:
+        sections["Daily Point"] = content[dp_match.end():ws_match.start()].strip()
+    else:
+        sections["Daily Point"] = ""
+        
+    if ws_match and gen_match:
+        sections["Weekly Schedule"] = content[ws_match.end():gen_match.start()].strip()
+    else:
+        sections["Weekly Schedule"] = ""
+        
+    if gen_match:
+        gen_content = content[gen_match.end():].strip()
+        disc_idx = gen_content.find("❇︎ 중요 안내사항")
+        if disc_idx != -1:
+            delim_idx = gen_content.rfind("---", 0, disc_idx)
+            if delim_idx != -1:
+                gen_content = gen_content[:delim_idx].strip()
+            else:
+                gen_content = gen_content[:disc_idx].strip()
+        sections["General"] = gen_content
+    else:
+        sections["General"] = ""
+        
+    return sections
+
+
+def extract_premarket_sections(content: str) -> dict[str, str]:
+    """Splits premarket report content into free and paid parts and strips the disclaimer."""
+    parts = [p.strip() for p in content.split("\n\n") if p.strip()]
+    sections = {}
+    if len(parts) > 0:
+        sections["Free"] = parts[0]
+    else:
+        sections["Free"] = ""
+        
+    if len(parts) > 1:
+        paid_content = "\n\n".join(parts[1:])
+        disc_idx = paid_content.find("❇︎ 중요 안내사항")
+        if disc_idx != -1:
+            delim_idx = paid_content.rfind("---", 0, disc_idx)
+            if delim_idx != -1:
+                paid_content = paid_content[:delim_idx].strip()
+            else:
+                paid_content = paid_content[:disc_idx].strip()
+        sections["Paid"] = paid_content
+    else:
+        sections["Paid"] = ""
+    return sections
 
 
 def read_markdown_file(file_path: str) -> str:
@@ -115,20 +156,69 @@ def read_markdown_file(file_path: str) -> str:
         sys.exit(1)
 
 
-def paste_rich_text(
-    page, editor_frame, selector: str, html_content: str, paste_last: bool = False
-):
-    """Writes HTML content to clipboard using standard wrappers and triggers paste."""
-    # Wrap in standard clipboard template to ensure the editor parses it as rich HTML
-    wrapped_html = (
-        f"<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>"
-        f"<!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
+def paste_below_heading(page, editor_frame, target_type: str, target_name: str, html_content: str):
+    """Finds target heading or paywall in editor, focuses the text block below it, and pastes HTML."""
+    print(f"Locating target '{target_name}' ({target_type}) in editor...")
+    
+    # Map target heading names to lists of potential matching texts in templates
+    search_names = [target_name]
+    if target_name == "Daily Point":
+        search_names = ["Daily Point", "데일리 포인트"]
+    elif target_name == "Weekly Schedule":
+        search_names = ["Weekly Schedule", "주간 일정", "주간일정"]
+    elif target_name == "General":
+        search_names = ["General", "경제 일반", "경제일반", "뉴스 일반"]
+    elif target_name == "장전 뉴스":
+        search_names = ["장전 뉴스", "장전뉴스"]
+
+    target_idx = editor_frame.evaluate(
+        """([type, names]) => {
+            const elements = Array.from(document.querySelectorAll('.se-component, .se-text-paragraph'));
+            
+            if (type === 'heading') {
+                const index = elements.findIndex(el => {
+                    if (!el.classList.contains('se-text-paragraph')) return false;
+                    const text = el.textContent.trim().toLowerCase();
+                    return names.some(name => text.includes(name.toLowerCase()));
+                });
+                return (index !== -1 && index < elements.length - 1) ? index + 1 : -1;
+            } else if (type === 'paywall') {
+                const index = elements.findIndex(el => 
+                    el.classList.contains('se-paywall') || 
+                    el.querySelector('[class*="paywall"], .se-paywall-line')
+                );
+                if (index !== -1) {
+                    for (let i = index + 1; i < elements.length; i++) {
+                        if (elements[i].classList.contains('se-text-paragraph')) {
+                            return i;
+                        }
+                    }
+                }
+                return -1;
+            }
+            return -1;
+        }""",
+        [target_type, search_names]
     )
     
-    # Ensure page is focused for clipboard access
-    page.bring_to_front()
+    if target_idx == -1:
+        print(f"Warning: Could not locate block below target '{target_name}' ({target_type}).")
+        return
+        
+    target_block = editor_frame.locator(".se-text-paragraph, .se-component").nth(target_idx)
+    target_block.wait_for(state="attached", timeout=5000)
     
-    # Write to clipboard in page context using direct arguments to avoid escaping issues
+    # Click to focus
+    target_block.click(force=True)
+    page.wait_for_timeout(500)
+    
+    span_loc = target_block.locator("span.__se-node").first
+    span_loc.wait_for(state="attached", timeout=5000)
+    span_loc.focus()
+    page.wait_for_timeout(1000)
+    
+    # Write to clipboard and paste
+    wrapped_html = f"<!DOCTYPE html><html><body><!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
     page.evaluate(
         """async (html) => {
             const blob = new Blob([html], { type: 'text/html' });
@@ -137,31 +227,14 @@ def paste_rich_text(
         }""",
         wrapped_html
     )
-    
-    # Click the section wrapper to force cursor positioning in the body
-    wrapper_loc = editor_frame.locator(".se-section-text")
-    target_wrapper = wrapper_loc.last if paste_last else wrapper_loc.first
-    
-    target_wrapper.wait_for(state="attached", timeout=10000)
-    target_wrapper.click(force=True)
-    page.wait_for_timeout(500)
-    
-    # Target either first or last editor block based on placement
-    loc = editor_frame.locator(selector)
-    target_loc = loc.last if paste_last else loc.first
-    
-    target_loc.wait_for(state="attached", timeout=10000)
-    target_loc.focus()
-    page.wait_for_timeout(1000)
-    
-    # Trigger paste command
     page.keyboard.press("Meta+V")
+    page.wait_for_timeout(1500)
 
 
-def publish_to_naver(
-    title: str, free_html: str, paid_html: str, keep_alive: bool = True
-):
-    """Executes the Playwright publishing flow with paywall splitting."""
+def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], keep_alive: bool = True):
+    """Executes the Playwright publishing flow with template loading and targeted pasting."""
+    is_premarket = "premarket" in file_path.lower()
+
     with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
             print(f"Didn't find login session file ({STATE_FILE}).")
@@ -209,31 +282,22 @@ def publish_to_naver(
                 page.click("text='텍스트'", force=True)
                 page.wait_for_timeout(5000)
             except Exception as e:
-                print(
-                    "Could not find or click '텍스트' button. Proceeding anyway. Error:",
-                    e,
-                )
+                print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
 
             # Wait for editor iframe and construct FrameLocator
             print("Locating editor iframe...")
             try:
-                page.wait_for_selector(
-                    "iframe[src*='editor']", state="attached", timeout=15000
-                )
+                page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
                 editor_frame = page.frame_locator("iframe[src*='editor']")
             except Exception as e:
-                print(
-                    "Failed to locate editor iframe. Operating on main page instead.", e
-                )
+                print("Failed to locate editor iframe. Operating on main page instead.", e)
                 editor_frame = page  # type: ignore
 
             # Handle temporary save popup (Dismiss if exists)
             print("Checking for temporary save popups...")
             try:
                 # Target the specific cancel button ID
-                cancel_btn = editor_frame.locator(
-                    "#localStorageMessageLayerCancelBtn"
-                ).first
+                cancel_btn = editor_frame.locator("#localStorageMessageLayerCancelBtn").first
                 # Wait up to 3 seconds for the popup to appear
                 cancel_btn.wait_for(state="visible", timeout=3000)
                 cancel_btn.click()
@@ -242,6 +306,36 @@ def publish_to_naver(
                 page.wait_for_timeout(2000)
             except Exception:
                 print("No temporary save popup detected or failed to dismiss.")
+
+            print("Opening template sidebar...")
+            try:
+                template_btn = editor_frame.locator("li.se-toolbar-item.se-toolbar-item-template > button").first
+                template_btn.wait_for(state="attached", timeout=10000)
+                template_btn.click(force=True)
+                page.wait_for_timeout(1500)
+                
+                template_sel = (
+                    "div.se-tab-content-my-template.se-is-on ul > li:nth-child(2) > a"
+                    if is_premarket
+                    else "div.se-tab-content-my-template.se-is-on ul > li:nth-child(1) > a"
+                )
+                template_item = editor_frame.locator(template_sel).first
+                template_item.wait_for(state="visible", timeout=10000)
+                template_item.click(force=True)
+                print("Clicked template item. Waiting for template to load...")
+                page.wait_for_timeout(4000)
+                
+                # Check for confirm popup (overwrite template confirm) and accept
+                try:
+                    confirm_btn = editor_frame.locator("button:has-text('확인'), .se-popup-button-confirm").first
+                    if confirm_btn.count() > 0:
+                        confirm_btn.click(timeout=2000)
+                        print("Confirmed template load overwrite.")
+                        page.wait_for_timeout(2000)
+                except Exception:
+                    pass
+            except Exception as e:
+                print("Could not load template:", e)
 
             print("Entering title...")
             try:
@@ -258,39 +352,20 @@ def publish_to_naver(
             except Exception as e:
                 print("Could not enter title. Error:", e)
 
-            print("Pasting free content...")
-            try:
-                # Paste HTML using standard clipboard paste
-                paste_rich_text(
-                    page, editor_frame, BODY_INPUT_SELECTOR, free_html, paste_last=False
-                )
-                page.wait_for_timeout(2000)
-            except Exception as e:
-                print("Failed to paste free content into body:", e)
-
-            print("Inserting paywall...")
-            try:
-                paywall_loc = editor_frame.locator(PAYWALL_BUTTON).first
-                paywall_loc.wait_for(state="attached", timeout=5000)
-                paywall_loc.click(force=True)
-                page.wait_for_timeout(1000)
-            except Exception as e:
-                print("Could not click paywall button:", e)
-
-            if paid_html:
-                print("Pasting paid content...")
-                try:
-                    # Paste paid HTML into the last paragraph block created below the paywall
-                    paste_rich_text(
-                        page,
-                        editor_frame,
-                        BODY_INPUT_SELECTOR,
-                        paid_html,
-                        paste_last=True,
-                    )
-                    page.wait_for_timeout(2000)
-                except Exception as e:
-                    print("Failed to paste paid content into body:", e)
+            if is_premarket:
+                # Premarket: Free content below "장전 뉴스", Paid content below the Paywall
+                if "Free" in html_sections:
+                    paste_below_heading(page, editor_frame, "heading", "장전 뉴스", html_sections["Free"])
+                if "Paid" in html_sections:
+                    paste_below_heading(page, editor_frame, "paywall", "paywall", html_sections["Paid"])
+            else:
+                # Regular Report: Daily Point, Weekly Schedule, General
+                if "Daily Point" in html_sections:
+                    paste_below_heading(page, editor_frame, "heading", "Daily Point", html_sections["Daily Point"])
+                if "Weekly Schedule" in html_sections:
+                    paste_below_heading(page, editor_frame, "heading", "Weekly Schedule", html_sections["Weekly Schedule"])
+                if "General" in html_sections:
+                    paste_below_heading(page, editor_frame, "heading", "General", html_sections["General"])
 
             print("Clicking next button...")
             try:
@@ -300,7 +375,7 @@ def publish_to_naver(
                 page.wait_for_timeout(3000)
                 print("Proceeded to next step!")
             except Exception as e:
-                print("Could not click next button:", e)
+                print("Could not click next button.", e)
 
             # ALWAYS save session state to refresh it
             context.storage_state(path=STATE_FILE)
@@ -329,26 +404,19 @@ def main():
     print(f"Title: {title}")
 
     raw_body = process_markdown_content(content, file_path)
-    free_markdown, paid_markdown = split_markdown_by_paywall(raw_body, file_path)
+    
+    is_premarket = "premarket" in file_path.lower()
+    if is_premarket:
+        sections = extract_premarket_sections(raw_body)
+    else:
+        sections = extract_regular_sections(raw_body)
 
-    # Render Markdown to HTML (keep newlines for proper block parsing)
-    free_html = markdown.markdown(free_markdown, extensions=["tables"])
-    paid_html = (
-        markdown.markdown(paid_markdown, extensions=["tables"]) if paid_markdown else ""
-    )
+    # Convert each section's markdown content to HTML
+    html_sections = {
+        name: markdown_to_naver_html(text) for name, text in sections.items() if text
+    }
 
-    # Map <h3> to <h2> because Naver SmartEditor ONE maps <h2> to Heading blocks
-    # while <h3> is stripped down to plain text.
-    free_html = free_html.replace("<h3>", "<h2>").replace("</h3>", "</h2>")
-    paid_html = (
-        paid_html.replace("<h3>", "<h2>").replace("</h3>", "</h2>") if paid_html else ""
-    )
-
-    # Inject inline styles to preserve heading sizes, paragraph spacing, and tables
-    free_html = inject_inline_styles(free_html)
-    paid_html = inject_inline_styles(paid_html) if paid_html else ""
-
-    publish_to_naver(title, free_html, paid_html, keep_alive=True)
+    publish_to_naver(title, file_path, html_sections, keep_alive=True)
 
 
 if __name__ == "__main__":
