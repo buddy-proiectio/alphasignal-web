@@ -420,10 +420,16 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             # Clear template text blocks safely via Meta+A -> Backspace to prevent React Virtual DOM unmount crashes
             print("Clearing template placeholders...")
             try:
-                body_edit = editor_frame.locator("[contenteditable='true']").first
-                body_edit.wait_for(state="visible", timeout=10000)
-                body_edit.click(force=True)
+                body_loc = editor_frame.locator(".se-component").first
+                body_loc.wait_for(state="visible", timeout=10000)
+                
+                target_el = body_loc.locator(".se-text-paragraph, p, .se-placeholder, span").first
+                target_el.wait_for(state="visible", timeout=5000)
+                target_el.click(force=True)
                 page.wait_for_timeout(500)
+                target_el.focus()
+                page.wait_for_timeout(500)
+                
                 page.keyboard.press("Meta+A")
                 page.wait_for_timeout(300)
                 page.keyboard.press("Backspace")
