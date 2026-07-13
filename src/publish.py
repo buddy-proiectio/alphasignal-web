@@ -264,28 +264,29 @@ def compile_sections_html(file_path: str, content: str) -> tuple[str, str]:
 
 
 def paste_at_index(page, editor_frame, target_idx: int, html_content: str):
-    """Focuses the .se-component block at target_idx and pastes HTML."""
+    """Focuses the .se-component block at target_idx and injects HTML using native execCommand."""
     target_block = editor_frame.locator(".se-component").nth(target_idx)
     target_block.wait_for(state="attached", timeout=5000)
     
     target_el = target_block.locator(".se-text-paragraph, p, .se-placeholder, span").first
     target_el.wait_for(state="attached", timeout=5000)
-    target_el.click(force=True)
-    page.wait_for_timeout(500)
-    target_el.focus()
-    page.wait_for_timeout(1000)
     
-    # Write to clipboard and paste
-    wrapped_html = f"<!DOCTYPE html><html><body><!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
-    page.evaluate(
-        """async (html) => {
-            const blob = new Blob([html], { type: 'text/html' });
-            const data = [new ClipboardItem({ 'text/html': blob })];
-            await navigator.clipboard.write(data);
+    # Programmatically focus and paste HTML inside editor frame context (robust against browser focus states)
+    editor_frame.evaluate(
+        """([el, html]) => {
+            el.focus();
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            range.collapse(true); // collapse to start of paragraph
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            
+            // Execute HTML insertion natively in contenteditable
+            document.execCommand('insertHTML', false, html);
         }""",
-        wrapped_html
+        [target_el.element_handle(), html_content]
     )
-    page.keyboard.press("Meta+V")
     page.wait_for_timeout(1500)
 
 
@@ -410,16 +411,13 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
 
             print("Entering title...")
             try:
-                # Click title to focus
-                editor_frame.locator(".se-title-text").first.click(force=True)
-                page.wait_for_timeout(500)
-
+                # Focus title element
                 title_loc = editor_frame.locator(TITLE_INPUT_SELECTOR).first
                 title_loc.wait_for(state="attached", timeout=15000)
                 
-                # Position cursor range to the end of the existing text ("2026년")
-                title_loc.evaluate(
-                    """el => {
+                # Append title suffix via execCommand natively
+                editor_frame.evaluate(
+                    """([el, text]) => {
                         el.focus();
                         const range = document.createRange();
                         range.selectNodeContents(el);
@@ -427,10 +425,13 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                         const sel = window.getSelection();
                         sel.removeAllRanges();
                         sel.addRange(range);
-                    }"""
+                        
+                        // Type text programmatically
+                        document.execCommand('insertText', false, text);
+                    }""",
+                    [title_loc.element_handle(), title]
                 )
                 page.wait_for_timeout(500)
-                page.keyboard.type(title, delay=100)
             except Exception as e:
                 print("Could not enter title. Error:", e)
 
