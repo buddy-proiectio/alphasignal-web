@@ -31,7 +31,7 @@ def process_markdown_content(content: str, file_path: str) -> str:
         if match:
             content = content[match.start() :]
 
-    disclaimer = "\n\n---\n❇︎ 중요 안내사항 ❇︎\n1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.\n2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.\n3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.\n4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.\n5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.\n6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
+    disclaimer = "<br /><br />---<br />❇︎ 중요 안내사항 ❇︎<br />1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.<br />2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.<br />3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.<br />4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.<br />5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.<br />6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
 
     return content.strip() + disclaimer
 
@@ -39,7 +39,7 @@ def process_markdown_content(content: str, file_path: str) -> str:
 def split_markdown_by_paywall(content: str, file_path: str) -> tuple[str, str]:
     """Splits markdown into free and paid parts based on report type."""
     is_premarket = "premarket" in file_path.lower()
-    
+
     if is_premarket:
         # Premarket: Split below the first article.
         # Since the header is already removed, content starts directly with the first article.
@@ -61,7 +61,7 @@ def split_markdown_by_paywall(content: str, file_path: str) -> tuple[str, str]:
         else:
             free_markdown = content
             paid_markdown = ""
-            
+
     return free_markdown.strip(), paid_markdown.strip()
 
 
@@ -101,17 +101,19 @@ def read_markdown_file(file_path: str) -> str:
         sys.exit(1)
 
 
-def paste_rich_text(page, editor_frame, selector: str, html_content: str, paste_last: bool = False):
+def paste_rich_text(
+    page, editor_frame, selector: str, html_content: str, paste_last: bool = False
+):
     """Writes HTML content to clipboard using standard wrappers and triggers paste."""
     # Wrap in standard clipboard template to ensure the editor parses it as rich HTML
     wrapped_html = (
         f"<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>"
         f"<!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
     )
-    
+
     # Ensure page is focused for clipboard access
     page.bring_to_front()
-    
+
     # Write to clipboard in page context using direct arguments to avoid escaping issues
     page.evaluate(
         """async (html) => {
@@ -119,22 +121,24 @@ def paste_rich_text(page, editor_frame, selector: str, html_content: str, paste_
             const data = [new ClipboardItem({ 'text/html': blob })];
             await navigator.clipboard.write(data);
         }""",
-        wrapped_html
+        wrapped_html,
     )
-    
+
     # Target either first or last editor block based on placement
     loc = editor_frame.locator(selector)
     target_loc = loc.last if paste_last else loc.first
-    
+
     target_loc.wait_for(state="attached", timeout=10000)
     target_loc.focus()
     page.wait_for_timeout(500)
-    
+
     # Trigger paste command
     page.keyboard.press("Meta+V")
 
 
-def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: bool = True):
+def publish_to_naver(
+    title: str, free_html: str, paid_html: str, keep_alive: bool = True
+):
     """Executes the Playwright publishing flow with paywall splitting."""
     with Stealth().use_sync(sync_playwright()) as p:
         if not os.path.exists(STATE_FILE):
@@ -183,38 +187,44 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
                 page.click("text='텍스트'", force=True)
                 page.wait_for_timeout(5000)
             except Exception as e:
-                print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
+                print(
+                    "Could not find or click '텍스트' button. Proceeding anyway. Error:",
+                    e,
+                )
 
             # Wait for editor iframe and construct FrameLocator
             print("Locating editor iframe...")
             try:
-                page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
+                page.wait_for_selector(
+                    "iframe[src*='editor']", state="attached", timeout=15000
+                )
                 editor_frame = page.frame_locator("iframe[src*='editor']")
             except Exception as e:
-                print("Failed to locate editor iframe. Operating on main page instead.", e)
-                editor_frame = page # type: ignore
+                print(
+                    "Failed to locate editor iframe. Operating on main page instead.", e
+                )
+                editor_frame = page  # type: ignore
 
             # Handle temporary save popup (Dismiss if exists)
             print("Checking for temporary save popups...")
             try:
-                # Scope to popup containers to avoid matching permanent UI buttons
-                cancel_btn = editor_frame.locator(".se-popup button:has-text('취소'), .se-dialog button:has-text('취소'), .se-popup-button-cancel").first
-                if cancel_btn.count() > 0:
-                    cancel_btn.click(timeout=3000)
-                    print("Dismissed temporary save popup.")
-                    cancel_btn.wait_for(state="detached", timeout=5000)
-                    page.wait_for_timeout(2000)
-                else:
-                    print("No temporary save popup visible.")
-            except Exception as e:
-                print("No temporary save popup detected or failed to dismiss:", e)
+                # Target the specific cancel button ID
+                cancel_btn = editor_frame.locator("#localStorageMessageLayerCancelBtn").first
+                # Wait up to 3 seconds for the popup to appear
+                cancel_btn.wait_for(state="visible", timeout=3000)
+                cancel_btn.click()
+                print("Dismissed temporary save popup.")
+                cancel_btn.wait_for(state="detached", timeout=5000)
+                page.wait_for_timeout(2000)
+            except Exception:
+                print("No temporary save popup detected or failed to dismiss.")
 
             print("Entering title...")
             try:
                 # 1. Click the title wrapper to initialize editor focus
                 editor_frame.locator(".se-title-text").first.click(force=True)
                 page.wait_for_timeout(500)
-                
+
                 # 2. Focus the exact contenteditable span and type
                 title_loc = editor_frame.locator(TITLE_INPUT_SELECTOR).first
                 title_loc.wait_for(state="attached", timeout=15000)
@@ -227,7 +237,9 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
             print("Pasting free content...")
             try:
                 # Paste HTML using standard clipboard paste
-                paste_rich_text(page, editor_frame, BODY_INPUT_SELECTOR, free_html, paste_last=False)
+                paste_rich_text(
+                    page, editor_frame, BODY_INPUT_SELECTOR, free_html, paste_last=False
+                )
                 page.wait_for_timeout(2000)
             except Exception as e:
                 print("Failed to paste free content into body:", e)
@@ -245,7 +257,13 @@ def publish_to_naver(title: str, free_html: str, paid_html: str, keep_alive: boo
                 print("Pasting paid content...")
                 try:
                     # Paste paid HTML into the last paragraph block created below the paywall
-                    paste_rich_text(page, editor_frame, BODY_INPUT_SELECTOR, paid_html, paste_last=True)
+                    paste_rich_text(
+                        page,
+                        editor_frame,
+                        BODY_INPUT_SELECTOR,
+                        paid_html,
+                        paste_last=True,
+                    )
                     page.wait_for_timeout(2000)
                 except Exception as e:
                     print("Failed to paste paid content into body:", e)
@@ -291,7 +309,14 @@ def main():
 
     # Render Markdown to HTML (keep newlines for proper block parsing)
     free_html = markdown.markdown(free_markdown, extensions=["tables"])
-    paid_html = markdown.markdown(paid_markdown, extensions=["tables"]) if paid_markdown else ""
+    paid_html = (
+        markdown.markdown(paid_markdown, extensions=["tables"]) if paid_markdown else ""
+    )
+
+    # Map <h3> to <h2> because Naver SmartEditor ONE maps <h2> to Heading blocks
+    # while <h3> is stripped down to plain text.
+    free_html = free_html.replace("<h3>", "<h2>").replace("</h3>", "</h2>")
+    paid_html = paid_html.replace("<h3>", "<h2>").replace("</h3>", "</h2>") if paid_html else ""
 
     publish_to_naver(title, free_html, paid_html, keep_alive=True)
 
