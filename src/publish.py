@@ -417,6 +417,21 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             except Exception as e:
                 print("Could not load template:", e)
 
+            # Clear template text blocks safely via Meta+A -> Backspace to prevent React Virtual DOM unmount crashes
+            print("Clearing template placeholders...")
+            try:
+                body_edit = editor_frame.locator("[contenteditable='true']").first
+                body_edit.wait_for(state="visible", timeout=10000)
+                body_edit.click(force=True)
+                page.wait_for_timeout(500)
+                page.keyboard.press("Meta+A")
+                page.wait_for_timeout(300)
+                page.keyboard.press("Backspace")
+                print("Template placeholders cleared successfully.")
+                page.wait_for_timeout(1000)
+            except Exception as e:
+                print("Failed to clear template body:", e)
+
             print("Entering title...")
             try:
                 # Click title to focus
@@ -456,12 +471,38 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                 }"""
             )
             if first_text_idx == -1:
-                first_text_idx = 1  # Fallback past title block
+                first_text_idx = 0
                 
             print(f"Pasting free content at index {first_text_idx}...")
             paste_at_index(page, editor_frame, first_text_idx, free_html)
             page.wait_for_timeout(2000)
             
+            # Find the last paragraph index to place paywall at the exact end of free content
+            last_free_para_idx = editor_frame.evaluate(
+                """() => {
+                    const elements = Array.from(document.querySelectorAll('.se-component'));
+                    for (let i = elements.length - 1; i >= 0; i--) {
+                        if (!elements[i].classList.contains('se-document-title') && 
+                            !elements[i].querySelector('.se-title-text') && 
+                            elements[i].querySelector('.se-text-paragraph, p')) {
+                            return i;
+                        }
+                    }
+                    return elements.length - 1;
+                }"""
+            )
+            
+            print(f"Focusing last paragraph at index {last_free_para_idx} to insert paywall...")
+            try:
+                last_block = editor_frame.locator(".se-component").nth(last_free_para_idx)
+                target_el = last_block.locator(".se-text-paragraph, p, .se-placeholder, span").first
+                target_el.click(force=True)
+                page.wait_for_timeout(500)
+                target_el.focus()
+                page.wait_for_timeout(1000)
+            except Exception as e:
+                print("Failed to focus paragraph for paywall insertion:", e)
+
             print("Inserting paywall line...")
             try:
                 paywall_btn = editor_frame.locator(PAYWALL_BUTTON).first
@@ -472,8 +513,7 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
             except Exception as e:
                 print("Failed to click paywall button:", e)
                 
-            # Clean up all redundant template elements after paywall
-            # Returns the clean paragraph block index immediately below the paywall
+            # Find the paragraph block immediately below the paywall block
             paid_text_idx = editor_frame.evaluate(
                 """() => {
                     const elements = Array.from(document.querySelectorAll('.se-component'));
@@ -482,19 +522,10 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                         el.querySelector('[class*="paywall"], .se-paywall-line')
                     );
                     if (paywallIdx !== -1) {
-                        let targetIdx = -1;
                         for (let i = paywallIdx + 1; i < elements.length; i++) {
                             if (elements[i].querySelector('.se-text-paragraph, p')) {
-                                targetIdx = i;
-                                break;
+                                return i;
                             }
-                        }
-                        if (targetIdx !== -1) {
-                            // Remove all trailing template placeholders
-                            for (let i = targetIdx + 1; i < elements.length; i++) {
-                                elements[i].remove();
-                            }
-                            return targetIdx;
                         }
                     }
                     return -1;
@@ -546,7 +577,7 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                 try:
                     # 1. Click open button
                     author_btn = page.locator(AUTHOR_OPEN_BUTTON).first
-                    author_btn.wait_for(state="visible", timeout=5000)
+                    author_btn.wait_for(state="visible", timeout=3000)
                     author_btn.click()
                     page.wait_for_timeout(1000)
                     
