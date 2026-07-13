@@ -17,23 +17,27 @@ NEXT_BUTTON = "#nextBtn"
 POPUP_CANCEL_BUTTON = "#localStorageMessageLayerCancelBtn"
 TEMPLATE_TOOLBAR_BUTTON = "li.se-toolbar-item.se-toolbar-item-template > button"
 MY_TEMPLATES_TAB_BUTTON = ".se-panel-tab-library ul > li:nth-child(3) > button"
-TEMPLATE_ITEM_REGULAR = "div.se-tab-content-my-template.se-is-on ul > li:nth-child(1) > a"
-TEMPLATE_ITEM_PREMARKET = "div.se-tab-content-my-template.se-is-on ul > li:nth-child(2) > a"
+TEMPLATE_ITEM_REGULAR = (
+    "div.se-tab-content-my-template.se-is-on ul > li:nth-child(1) > a"
+)
+TEMPLATE_ITEM_PREMARKET = (
+    "div.se-tab-content-my-template.se-is-on ul > li:nth-child(2) > a"
+)
 TEMPLATE_OVERWRITE_CONFIRM_BUTTON = "button:has-text('확인'), .se-popup-button-confirm"
 
 # Canonical mapping of regular report categories to their English/Korean aliases in templates
 CATEGORY_MAP = {
-    "Weekly Schedule": ["Weekly Schedule", "주간 일정", "주간일정"],
-    "General": ["General", "경제 일반", "경제일반", "뉴스 일반"],
+    "Weekly Schedule": ["Weekly Schedule", "주간 일정"],
+    "General": ["General", "경제 일반"],
     "Bitcoin": ["Bitcoin", "비트코인"],
     "Semiconductor": ["Semiconductor", "반도체"],
-    "AI / Robotics / EV": ["AI / Robotics / EV", "AI / 로봇 / EV", "AI/로봇/EV", "AI/Robotics/EV"],
-    "Power / Grid": ["Power / Grid", "Power/Grid", "전력 / 인프라", "전력/인프라", "전력 인프라"],
+    "AI / Robotics / EV": ["AI / Robotics / EV", "AI / 로봇 / EV"],
+    "Power / Grid": ["Power / Grid", "전력 / 인프라"],
     "Software": ["Software", "소프트웨어"],
-    "Aerospace": ["Aerospace", "우주 항공", "우주항공"],
+    "Aerospace": ["Aerospace", "우주 항공"],
     "Bio": ["Bio", "바이오"],
-    "Consumer / Retail": ["Consumer / Retail", "Consumer/Retail", "소비재 / 리테일", "소비재/리테일", "소비재 리테일"],
-    "Others": ["Others", "기타"]
+    "Consumer / Retail": ["Consumer / Retail", "소비재 / 리테일"],
+    "Others": ["Others", "기타"],
 }
 
 
@@ -56,9 +60,7 @@ def process_markdown_content(content: str, file_path: str) -> str:
         if match:
             content = content[match.start() :]
 
-    disclaimer = "\n\n---\n❇︎ 중요 안내사항 ❇︎<br />1. 본 리포트(Alpha Signal)는 투자 판단을 돕기 위한 순수 데이터 제공을 목적으로 하며, 특정 종목에 대한 매수·매도 등 투자 권유나 자문을 의미하지 않습니다.<br />2. 제공되는 모든 내용은 자체 개발한 AI 알고리즘이 미국 시장의 영문 공시 및 뉴스 원문에서 팩트 수치(KPI)만을 기계적으로 추출한 결과물이며, 작성자의 주관적 의견이 배제되어 있습니다.<br />3. 자동화된 시스템을 통한 수집 과정에서 오류, 지연 또는 누락이 발생할 수 있으므로 정보의 완전성을 보장하지 않습니다. 중요한 수치는 반드시 영문 원문을 교차 검증하시기 바랍니다.<br />4. 본 리포트의 데이터를 활용한 모든 투자 판단과 결과에 대한 최종 책임은 전적으로 구독자 본인에게 있습니다.<br />5. 본 채널에서 발행한 모든 콘텐츠는 3개월 경과 후 구독상품에서 제외됩니다.<br />6. 서비스 운영에 관한 질문은 이메일을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에 영향을 미치는 문의에는 답변하지 않습니다."
-
-    return content.strip() + disclaimer
+    return content.strip()
 
 
 def extract_metadata(file_path: str) -> str:
@@ -87,70 +89,84 @@ def extract_metadata(file_path: str) -> str:
 def markdown_to_naver_html(md_text: str) -> str:
     """Converts markdown to HTML, replacing paragraph tags with double br tags for clean Naver blocks."""
     html = markdown.markdown(md_text, extensions=["tables"])
-    
+
     # Remove outer <p> wrappers and replace paragraph junctions with double breaks
     if html.startswith("<p>") and html.endswith("</p>"):
         html = html[3:-4]
     html = html.replace("</p>\n<p>", "<br /><br />")
-    
+
     # Map <h3> to <h2> because Naver SmartEditor ONE maps <h2> to Heading blocks
     # while <h3> is stripped down to plain text.
     html = html.replace("<h3>", "<h2>").replace("</h3>", "</h2>")
-    
+
     # Inject inline styles to preserve formatting
     # Headings formatting (large, bold, with margins)
-    html = html.replace("<h2>", "<h2 style='font-size: 20px; font-weight: bold; margin-top: 24px; margin-bottom: 12px; line-height: 1.4; color: #111111;'>")
-    
+    html = html.replace(
+        "<h2>",
+        "<h2 style='font-size: 20px; font-weight: bold; margin-top: 24px; margin-bottom: 12px; line-height: 1.4; color: #111111;'>",
+    )
+
     # Paragraph formatting (body font size and generous bottom margins for spacing between articles)
-    html = html.replace("<p>", "<p style='font-size: 15px; line-height: 1.8; margin-top: 0; margin-bottom: 24px; color: #333333;'>")
-    
+    html = html.replace(
+        "<p>",
+        "<p style='font-size: 15px; line-height: 1.8; margin-top: 0; margin-bottom: 24px; color: #333333;'>",
+    )
+
     # Link formatting
-    html = html.replace("<a ", "<a style='color: #0066cc; text-decoration: underline;' ")
-    
+    html = html.replace(
+        "<a ", "<a style='color: #0066cc; text-decoration: underline;' "
+    )
+
     return html.strip()
 
 
 def extract_regular_sections(content: str) -> dict[str, str]:
     """Dynamically splits markdown content by category headers in CATEGORY_MAP."""
     sections = {}
-    
+
     # Flatten all alias names into a single list
     all_aliases = []
     for aliases in CATEGORY_MAP.values():
         all_aliases.extend(aliases)
     escaped_aliases = [re.escape(alias) for alias in all_aliases]
-    
+
     # Match '### Heading Name'
-    heading_pattern = r"(?:^|\n)(###\s+(?:" + "|".join(escaped_aliases) + r"))(?=\s|$|\n)"
+    heading_pattern = (
+        r"(?:^|\n)(###\s+(?:" + "|".join(escaped_aliases) + r"))(?=\s|$|\n)"
+    )
     matches = list(re.finditer(heading_pattern, content, re.IGNORECASE))
-    
+
     for i, match in enumerate(matches):
         full_header = match.group(1)
         matched_name = re.sub(r"^###\s+", "", full_header).strip()
-        
+
         # Resolve to canonical category key
         category_key = None
         for key, aliases in CATEGORY_MAP.items():
             if any(alias.lower() == matched_name.lower() for alias in aliases):
                 category_key = key
                 break
-                
+
         if not category_key:
             continue
-            
+
         start_idx = match.end()
-        end_idx = matches[i+1].start() if i + 1 < len(matches) else len(content)
+        end_idx = matches[i + 1].start() if i + 1 < len(matches) else len(content)
         body = content[start_idx:end_idx].strip()
-        
+
         # Strip disclaimer if last section
         if i + 1 == len(matches):
             disc_idx = body.find("❇︎ 중요 안내사항")
             if disc_idx != -1:
                 delim_idx = body.rfind("---", 0, disc_idx)
-                body = body[:delim_idx].strip() if delim_idx != -1 else body[:disc_idx].strip()
-                
+                body = (
+                    body[:delim_idx].strip()
+                    if delim_idx != -1
+                    else body[:disc_idx].strip()
+                )
+
             sections[category_key] = body
-            
+
         return sections
 
 
@@ -162,13 +178,17 @@ def extract_premarket_sections(content: str) -> dict[str, str]:
         sections["Free"] = parts[0]
     else:
         sections["Free"] = ""
-        
+
     if len(parts) > 1:
         paid_content = "\n\n".join(parts[1:])
         disc_idx = paid_content.find("❇︎ 중요 안내사항")
         if disc_idx != -1:
             delim_idx = paid_content.rfind("---", 0, disc_idx)
-            paid_content = paid_content[:delim_idx].strip() if delim_idx != -1 else paid_content[:disc_idx].strip()
+            paid_content = (
+                paid_content[:delim_idx].strip()
+                if delim_idx != -1
+                else paid_content[:disc_idx].strip()
+            )
         sections["Paid"] = paid_content
     else:
         sections["Paid"] = ""
@@ -188,10 +208,12 @@ def read_markdown_file(file_path: str) -> str:
         sys.exit(1)
 
 
-def paste_below_heading(page, editor_frame, target_type: str, target_name: str, html_content: str):
+def paste_below_heading(
+    page, editor_frame, target_type: str, target_name: str, html_content: str
+):
     """Finds target heading or paywall in editor, focuses the text block below it, and pastes HTML."""
     print(f"Locating target '{target_name}' ({target_type}) in editor...")
-    
+
     # Map target heading names to lists of potential matching texts in templates
     search_names = [target_name]
     if target_name in CATEGORY_MAP:
@@ -226,25 +248,29 @@ def paste_below_heading(page, editor_frame, target_type: str, target_name: str, 
             }
             return -1;
         }""",
-        [target_type, search_names]
+        [target_type, search_names],
     )
-    
+
     if target_idx == -1:
-        print(f"Warning: Could not locate block below target '{target_name}' ({target_type}).")
+        print(
+            f"Warning: Could not locate block below target '{target_name}' ({target_type})."
+        )
         return
-        
-    target_block = editor_frame.locator(".se-text-paragraph, .se-component").nth(target_idx)
+
+    target_block = editor_frame.locator(".se-text-paragraph, .se-component").nth(
+        target_idx
+    )
     target_block.wait_for(state="attached", timeout=5000)
-    
+
     # Click to focus
     target_block.click(force=True)
     page.wait_for_timeout(500)
-    
+
     span_loc = target_block.locator("span.__se-node").first
     span_loc.wait_for(state="attached", timeout=5000)
     span_loc.focus()
     page.wait_for_timeout(1000)
-    
+
     # Write to clipboard and paste
     wrapped_html = f"<!DOCTYPE html><html><body><!--StartFragment-->{html_content}<!--EndFragment--></body></html>"
     page.evaluate(
@@ -253,13 +279,15 @@ def paste_below_heading(page, editor_frame, target_type: str, target_name: str, 
             const data = [new ClipboardItem({ 'text/html': blob })];
             await navigator.clipboard.write(data);
         }""",
-        wrapped_html
+        wrapped_html,
     )
     page.keyboard.press("Meta+V")
     page.wait_for_timeout(1500)
 
 
-def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], keep_alive: bool = True):
+def publish_to_naver(
+    title: str, file_path: str, html_sections: dict[str, str], keep_alive: bool = True
+):
     """Executes the Playwright publishing flow with template loading and targeted pasting."""
     is_premarket = "premarket" in file_path.lower()
 
@@ -310,15 +338,22 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
                 page.click("text='텍스트'", force=True)
                 page.wait_for_timeout(5000)
             except Exception as e:
-                print("Could not find or click '텍스트' button. Proceeding anyway. Error:", e)
+                print(
+                    "Could not find or click '텍스트' button. Proceeding anyway. Error:",
+                    e,
+                )
 
             # Wait for editor iframe and construct FrameLocator
             print("Locating editor iframe...")
             try:
-                page.wait_for_selector("iframe[src*='editor']", state="attached", timeout=15000)
+                page.wait_for_selector(
+                    "iframe[src*='editor']", state="attached", timeout=15000
+                )
                 editor_frame = page.frame_locator("iframe[src*='editor']")
             except Exception as e:
-                print("Failed to locate editor iframe. Operating on main page instead.", e)
+                print(
+                    "Failed to locate editor iframe. Operating on main page instead.", e
+                )
                 editor_frame = page  # type: ignore
 
             # Handle temporary save popup (Dismiss if exists)
@@ -341,27 +376,27 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
                 template_btn.wait_for(state="attached", timeout=10000)
                 template_btn.click(force=True)
                 page.wait_for_timeout(1500)
-                
+
                 # Click the "내 템플릿" (My Templates) tab button
                 my_templates_tab = editor_frame.locator(MY_TEMPLATES_TAB_BUTTON).first
                 my_templates_tab.wait_for(state="visible", timeout=5000)
                 my_templates_tab.click(force=True)
                 page.wait_for_timeout(1000)
-                
+
                 template_sel = (
-                    TEMPLATE_ITEM_PREMARKET
-                    if is_premarket
-                    else TEMPLATE_ITEM_REGULAR
+                    TEMPLATE_ITEM_PREMARKET if is_premarket else TEMPLATE_ITEM_REGULAR
                 )
                 template_item = editor_frame.locator(template_sel).first
                 template_item.wait_for(state="visible", timeout=10000)
                 template_item.click(force=True)
                 print("Clicked template item. Waiting for template to load...")
                 page.wait_for_timeout(4000)
-                
+
                 # Check for confirm popup (overwrite template confirm) and accept
                 try:
-                    confirm_btn = editor_frame.locator(TEMPLATE_OVERWRITE_CONFIRM_BUTTON).first
+                    confirm_btn = editor_frame.locator(
+                        TEMPLATE_OVERWRITE_CONFIRM_BUTTON
+                    ).first
                     if confirm_btn.count() > 0:
                         confirm_btn.click(timeout=2000)
                         print("Confirmed template load overwrite.")
@@ -382,11 +417,11 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
                 title_loc.wait_for(state="attached", timeout=15000)
                 title_loc.focus()
                 page.wait_for_timeout(500)
-                
+
                 # 3. Clear existing title template placeholder using JavaScript
                 title_loc.evaluate("el => el.textContent = ''")
                 page.wait_for_timeout(200)
-                
+
                 # 4. Type the new title
                 page.keyboard.type(title, delay=100)
             except Exception as e:
@@ -395,14 +430,28 @@ def publish_to_naver(title: str, file_path: str, html_sections: dict[str, str], 
             if is_premarket:
                 # Premarket: Free content below "장전 뉴스", Paid content below the Paywall
                 if "Free" in html_sections:
-                    paste_below_heading(page, editor_frame, "heading", "장전 뉴스", html_sections["Free"])
+                    paste_below_heading(
+                        page,
+                        editor_frame,
+                        "heading",
+                        "장전 뉴스",
+                        html_sections["Free"],
+                    )
                 if "Paid" in html_sections:
-                    paste_below_heading(page, editor_frame, "paywall", "paywall", html_sections["Paid"])
+                    paste_below_heading(
+                        page, editor_frame, "paywall", "paywall", html_sections["Paid"]
+                    )
             else:
                 # Regular Report: Loop over CATEGORY_MAP keys to paste in template order
                 for category_key in CATEGORY_MAP.keys():
                     if category_key in html_sections:
-                        paste_below_heading(page, editor_frame, "heading", category_key, html_sections[category_key])
+                        paste_below_heading(
+                            page,
+                            editor_frame,
+                            "heading",
+                            category_key,
+                            html_sections[category_key],
+                        )
 
             print("Clicking next button...")
             try:
@@ -441,7 +490,7 @@ def main():
     print(f"Title: {title}")
 
     raw_body = process_markdown_content(content, file_path)
-    
+
     is_premarket = "premarket" in file_path.lower()
     if is_premarket:
         sections = extract_premarket_sections(raw_body)
