@@ -537,7 +537,7 @@ def publish_to_naver(title: str, file_path: str, free_html: str, paid_html: str,
                 print("Selecting author...")
                 try:
                     author_select = page.locator("div.ant-row.ant-form-item:has-text('작성자') .ant-select-selector, .select-author .ant-select-selector").first
-                    author_select.wait_for(state="visible", timeout=10000)
+                    author_select.wait_for(state="visible", timeout=3000)
                     author_select.click()
                     page.wait_for_timeout(1000)
                     
