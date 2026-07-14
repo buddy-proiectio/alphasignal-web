@@ -8,20 +8,22 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
     "postinstall": "node scripts/patch-next-ts.js"
   },
   "dependencies": {
     "next": "16.2.10",
+    "next-mdx-remote": "^5.0.0",
     "react": "19.0.0",
-    "react-dom": "19.0.0",
-    "next-mdx-remote": "^5.0.0"
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
-    "typescript": "7.0.2",
     "@types/node": "^20.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
-    "eslint-config-next": "16.2.10"
+    "eslint-config-next": "16.2.10",
+    "typescript": "7.0.2",
+    "vitest": "^4.1.10"
   }
 }
