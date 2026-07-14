@@ -51,7 +51,7 @@ export default function TickerTapeWidget() {
         },
         {
           proName: "FX:USDKRW",
-          title: "KRW/USD",
+          title: "USD/KRW",
         },
       ],
       showSymbolLogo: true,
