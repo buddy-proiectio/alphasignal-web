@@ -32,17 +32,19 @@ export default async function NoticePage() {
     console.error("Failed to read notices directory:", err);
   }
 
-  const mdxFiles = files.filter((file) => file.endsWith(".mdx") || file.endsWith(".md"));
+  const mdxFiles = files.filter(
+    (file) => file.endsWith(".mdx") || file.endsWith(".md"),
+  );
 
   const notices = await Promise.all(
     mdxFiles.map(async (file) => {
       const slug = file.replace(/\.mdx?$/, "");
       const filePath = path.join(dirPath, file);
       const source = await fs.readFile(filePath, "utf-8");
-      
+
       const { frontmatter } = await compileMDX<NoticeFrontmatter>({
         source,
-        options: { parseFrontmatter: true }
+        options: { parseFrontmatter: true },
       });
 
       return {
@@ -50,7 +52,7 @@ export default async function NoticePage() {
         title: frontmatter.title || slug,
         date: frontmatter.date || "",
       };
-    })
+    }),
   );
 
   // Sort notices by date descending
@@ -64,11 +66,25 @@ export default async function NoticePage() {
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {notices.map((notice) => (
-            <li key={notice.slug} style={{ marginBottom: "1rem", borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
-              <Link href={`/notice/${notice.slug}`} style={{ textDecoration: "none", color: "#0070f3" }}>
-                <h2 style={{ fontSize: "1.25rem", margin: "0 0 0.5rem 0" }}>{notice.title}</h2>
+            <li
+              key={notice.slug}
+              style={{
+                marginBottom: "1rem",
+                borderBottom: "1px solid #eee",
+                paddingBottom: "1rem",
+              }}
+            >
+              <Link
+                href={`/notice/${notice.slug}`}
+                style={{ textDecoration: "none", color: "#0070f3" }}
+              >
+                <h2 style={{ fontSize: "1.25rem", margin: "0 0 0.5rem 0" }}>
+                  {notice.title}
+                </h2>
               </Link>
-              <small style={{ color: "#666" }}>{formatNoticeDate(notice.date)}</small>
+              <small style={{ color: "#666" }}>
+                {formatNoticeDate(notice.date)}
+              </small>
             </li>
           ))}
         </ul>

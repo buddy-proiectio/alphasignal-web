@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useEffect } from "react";
 
@@ -15,7 +15,7 @@ export default function Adsense({
   slot = "1234567890",
   format = "auto",
   responsive = "true",
-  style = { display: "block", textAlign: "center" }
+  style = { display: "block", textAlign: "center" },
 }: AdsenseProps) {
   useEffect(() => {
     try {
@@ -27,7 +27,7 @@ export default function Adsense({
   }, []);
 
   return (
-    <div 
+    <div
       style={{
         margin: "1.5rem 0",
         padding: "1rem",
@@ -35,10 +35,10 @@ export default function Adsense({
         borderRadius: "12px",
         backgroundColor: "hsl(var(--card) / 0.5)",
         textAlign: "center",
-        position: "relative"
+        position: "relative",
       }}
     >
-      <div 
+      <div
         style={{
           position: "absolute",
           top: "4px",
@@ -46,7 +46,7 @@ export default function Adsense({
           fontSize: "10px",
           color: "hsl(var(--muted))",
           letterSpacing: "0.05em",
-          textTransform: "uppercase"
+          textTransform: "uppercase",
         }}
       >
         ADVERTISEMENT
@@ -61,7 +61,13 @@ export default function Adsense({
         data-full-width-responsive={responsive}
       />
       {/* Fallback styling placeholder for visual layout */}
-      <div style={{ color: "hsl(var(--muted))", fontSize: "12px", padding: "1rem 0" }}>
+      <div
+        style={{
+          color: "hsl(var(--muted))",
+          fontSize: "12px",
+          padding: "1rem 0",
+        }}
+      >
         Google AdSense Placeholder (Slot: {slot})
       </div>
     </div>

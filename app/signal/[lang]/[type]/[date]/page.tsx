@@ -24,8 +24,12 @@ export default async function SignalDetailPage({ params }: PageProps) {
   const VALID_LANGS = ["ko", "en"] as const;
   const VALID_TYPES = ["alpha", "premarket"] as const;
 
-  const isValidLang = VALID_LANGS.includes(lang as typeof VALID_LANGS[number]);
-  const isValidType = VALID_TYPES.includes(type as typeof VALID_TYPES[number]);
+  const isValidLang = VALID_LANGS.includes(
+    lang as (typeof VALID_LANGS)[number],
+  );
+  const isValidType = VALID_TYPES.includes(
+    type as (typeof VALID_TYPES)[number],
+  );
   const isValidDate = /^\d{8}$/.test(date);
 
   if (!isValidLang || !isValidType || !isValidDate) {
@@ -36,26 +40,43 @@ export default async function SignalDetailPage({ params }: PageProps) {
   try {
     rawMarkdown = await fetchSignalMarkdown(lang, type, date);
   } catch (err) {
-    console.error(`Failed to fetch signal markdown (${lang}/${type}/${date}):`, err);
+    console.error(
+      `Failed to fetch signal markdown (${lang}/${type}/${date}):`,
+      err,
+    );
     notFound();
   }
 
   // Parse frontmatter and compile MDX dynamically
   const { content, frontmatter } = await compileMDX<SignalFrontmatter>({
     source: rawMarkdown,
-    options: { parseFrontmatter: true }
+    options: { parseFrontmatter: true },
   });
 
   return (
     <div className="container" style={{ maxWidth: 800 }}>
-      <header style={{ marginBottom: "2rem", borderBottom: "1px solid hsl(var(--border))", paddingBottom: "1.5rem" }}>
+      <header
+        style={{
+          marginBottom: "2rem",
+          borderBottom: "1px solid hsl(var(--border))",
+          paddingBottom: "1.5rem",
+        }}
+      >
         <div style={{ marginBottom: "1rem" }}>
           <span className="badge badge-premium">
             {type.toUpperCase()} SIGNAL ({lang.toUpperCase()})
           </span>
         </div>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: 800, marginBottom: "0.5rem", color: "hsl(var(--foreground))" }}>
-          {frontmatter.title || `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
+        <h1
+          style={{
+            fontSize: "2.5rem",
+            fontWeight: 800,
+            marginBottom: "0.5rem",
+            color: "hsl(var(--foreground))",
+          }}
+        >
+          {frontmatter.title ||
+            `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
         </h1>
         <time style={{ color: "hsl(var(--muted))", fontSize: "0.9rem" }}>
           {frontmatter.date || date}

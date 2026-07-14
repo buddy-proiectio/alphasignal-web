@@ -9,7 +9,10 @@ export async function POST(req: NextRequest) {
     const secret = process.env.GITHUB_WEBHOOK_SECRET || "";
 
     if (!secret) {
-      return NextResponse.json({ error: "Webhook secret is not configured" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Webhook secret is not configured" },
+        { status: 500 },
+      );
     }
 
     const hmac = crypto.createHmac("sha256", secret);
@@ -32,6 +35,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ revalidated: true });
   } catch (error) {
     console.error("Revalidation error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

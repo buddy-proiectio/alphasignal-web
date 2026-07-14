@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState } from "react";
 
@@ -13,7 +13,7 @@ export default function Sponsorship({
   tossLink = "https://toss.me/buddypremium",
   bankName = "토스뱅크",
   accountNumber = "1000-1234-5678",
-  accountHolder = "(주)버디프리미엄"
+  accountHolder = "(주)버디프리미엄",
 }: SponsorshipProps) {
   const [copied, setCopied] = useState(false);
 
@@ -28,51 +28,53 @@ export default function Sponsorship({
   };
 
   return (
-    <div 
+    <div
       style={{
         margin: "3rem auto 1.5rem",
         padding: "2rem",
         borderRadius: "16px",
-        background: "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card-hover)) 100%)",
+        background:
+          "linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card-hover)) 100%)",
         border: "1px solid hsl(var(--border))",
         boxShadow: "var(--shadow-lg)",
         maxWidth: "600px",
-        textAlign: "center"
+        textAlign: "center",
       }}
     >
-      <h3 
-        style={{ 
-          fontFamily: "Outfit, sans-serif", 
-          fontSize: "1.25rem", 
+      <h3
+        style={{
+          fontFamily: "Outfit, sans-serif",
+          fontSize: "1.25rem",
           fontWeight: 700,
           marginBottom: "0.5rem",
-          color: "hsl(var(--foreground))"
+          color: "hsl(var(--foreground))",
         }}
       >
         ✨ Premium Support & Sponsorship
       </h3>
-      <p 
-        style={{ 
-          fontSize: "0.875rem", 
-          color: "hsl(var(--muted))", 
+      <p
+        style={{
+          fontSize: "0.875rem",
+          color: "hsl(var(--muted))",
           marginBottom: "1.5rem",
-          lineHeight: "1.5"
+          lineHeight: "1.5",
         }}
       >
-        Buddy Premium의 양질의 투자 정보 분석을 후원해주세요. 후원금은 데이터 서버 유지 및 분석 시스템 고도화에 전액 사용됩니다.
+        Buddy Premium의 양질의 투자 정보 분석을 후원해주세요. 후원금은 데이터
+        서버 유지 및 분석 시스템 고도화에 전액 사용됩니다.
       </p>
 
-      <div 
+      <div
         style={{
           display: "flex",
           flexDirection: "column",
           gap: "1rem",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
         }}
       >
         {/* Toss Pay Button */}
-        <a 
+        <a
           href={tossLink}
           target="_blank"
           rel="noopener noreferrer"
@@ -90,7 +92,7 @@ export default function Sponsorship({
             width: "100%",
             maxWidth: "320px",
             transition: "all var(--transition-fast)",
-            boxShadow: "0 4px 12px rgba(0, 80, 255, 0.3)"
+            boxShadow: "0 4px 12px rgba(0, 80, 255, 0.3)",
           }}
           onMouseOver={(e) => {
             e.currentTarget.style.backgroundColor = "#0040cc";
@@ -105,7 +107,7 @@ export default function Sponsorship({
         </a>
 
         {/* Bank Account Section */}
-        <div 
+        <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -116,13 +118,19 @@ export default function Sponsorship({
             borderRadius: "12px",
             width: "100%",
             maxWidth: "320px",
-            fontSize: "0.85rem"
+            fontSize: "0.85rem",
           }}
         >
           <div style={{ textAlign: "left" }}>
-            <span style={{ color: "hsl(var(--muted))", marginRight: "0.5rem" }}>{bankName}</span>
-            <span style={{ fontWeight: 600, color: "hsl(var(--foreground))" }}>{accountNumber}</span>
-            <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted))" }}>예금주: {accountHolder}</div>
+            <span style={{ color: "hsl(var(--muted))", marginRight: "0.5rem" }}>
+              {bankName}
+            </span>
+            <span style={{ fontWeight: 600, color: "hsl(var(--foreground))" }}>
+              {accountNumber}
+            </span>
+            <div style={{ fontSize: "0.75rem", color: "hsl(var(--muted))" }}>
+              예금주: {accountHolder}
+            </div>
           </div>
           <button
             onClick={handleCopy}
@@ -135,7 +143,7 @@ export default function Sponsorship({
               fontWeight: 600,
               fontSize: "0.75rem",
               cursor: "pointer",
-              transition: "all 0.15s ease"
+              transition: "all 0.15s ease",
             }}
           >
             {copied ? "복사됨!" : "복사"}
