@@ -46,24 +46,26 @@ export default function ContentCard({ item }: ContentCardProps) {
   return (
     <Link
       href={item.href}
-      className="block p-6 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all duration-200"
+      className="flex flex-col h-full p-6 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all duration-200"
     >
-      <h3 className="inline-flex items-center text-lg font-semibold text-slate-900 dark:text-slate-50 leading-relaxed mb-2">
-        {isNew && (
-          <span className="inline-flex items-center justify-center w-4 h-4 mr-1.5 rounded-full bg-blue-600 text-white text-[0.5rem] font-bold align-middle">
-            N
-          </span>
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 leading-relaxed mb-2">
+          {isNew && (
+            <span className="inline-flex items-center justify-center w-4 h-4 mr-1.5 rounded-full bg-blue-600 text-white text-[0.5rem] font-bold align-middle">
+              N
+            </span>
+          )}
+          <span>{item.title}</span>
+        </h3>
+
+        {item.excerpt && (
+          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-3">
+            {item.excerpt}
+          </p>
         )}
-        {item.title}
-      </h3>
+      </div>
 
-      {item.excerpt && (
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-3">
-          {item.excerpt}
-        </p>
-      )}
-
-      <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+      <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mt-auto">
         {isNotice && (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
             공지
