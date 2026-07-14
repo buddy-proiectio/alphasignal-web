@@ -1,3 +1,6 @@
+import { calcReadingTime } from "../utils/reading-time";
+import { extractExcerpt } from "../utils/extract-excerpt";
+
 export interface SignalFrontmatter {
   title: string;
   date: string;
@@ -7,7 +10,8 @@ export interface SignalFrontmatter {
 
 interface SignalListItem extends SignalFrontmatter {
   filename: string;
-  contentLength: number;
+  readingMinutes: number;
+  excerpt: string;
 }
 
 interface GitHubContentItem {
@@ -16,6 +20,7 @@ interface GitHubContentItem {
 }
 
 const REPO = "buddy-proiectio/data";
+const FETCH_TIMEOUT = 10_000;
 
 function parseFrontmatter(raw: string): Record<string, string> | null {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -31,20 +36,31 @@ function parseFrontmatter(raw: string): Record<string, string> | null {
   return result;
 }
 
-async function listGitHubDir(dir: string): Promise<string[]> {
+function githubFetch(url: string, raw = false): Promise<Response> {
   const pat = process.env.GITHUB_PAT;
   if (!pat) {
     throw new Error("Missing GITHUB_PAT environment variable.");
   }
 
-  const url = `https://api.github.com/repos/${REPO}/contents/${dir}`;
-  const res = await fetch(url, {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+  return fetch(url, {
     headers: {
       Authorization: `token ${pat}`,
-      Accept: "application/vnd.github.v3+json",
+      Accept: raw
+        ? "application/vnd.github.v3.raw"
+        : "application/vnd.github.v3+json",
     },
-    next: { tags: ["signal"] },
-  });
+    next: { tags: ["signal"], revalidate: false },
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timer));
+}
+
+async function listGitHubDir(dir: string): Promise<string[]> {
+  const res = await githubFetch(
+    `https://api.github.com/repos/${REPO}/contents/${dir}`,
+  );
 
   if (!res.ok) {
     throw new Error(
@@ -59,27 +75,36 @@ async function listGitHubDir(dir: string): Promise<string[]> {
 }
 
 async function fetchFileRaw(dir: string, filename: string): Promise<string> {
-  const pat = process.env.GITHUB_PAT;
-  if (!pat) {
-    throw new Error("Missing GITHUB_PAT environment variable.");
-  }
-
-  const url = `https://api.github.com/repos/${REPO}/contents/${dir}/${filename}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `token ${pat}`,
-      Accept: "application/vnd.github.v3.raw",
-    },
-    next: { tags: ["signal"] },
-  });
+  const res = await githubFetch(
+    `https://api.github.com/repos/${REPO}/contents/${dir}/${filename}`,
+    true,
+  );
 
   if (!res.ok) {
-    throw new Error(
-      `Failed to fetch ${dir}/${filename}: ${res.statusText}`,
-    );
+    throw new Error(`Failed to fetch ${dir}/${filename}: ${res.statusText}`);
   }
 
   return res.text();
+}
+
+function buildSignalItem(
+  file: string,
+  raw: string,
+  defaultCategory: "alpha_signal" | "alpha_signal_premarket",
+): SignalListItem | null {
+  const fm = parseFrontmatter(raw);
+  if (!fm) return null;
+  const lang = (fm.lang as SignalFrontmatter["lang"]) || "en";
+  return {
+    title: fm.title || file,
+    date: fm.date || "",
+    category:
+      (fm.category as SignalFrontmatter["category"]) || defaultCategory,
+    lang,
+    filename: file,
+    readingMinutes: calcReadingTime(raw, lang),
+    excerpt: extractExcerpt(raw),
+  };
 }
 
 export async function fetchSignalList(): Promise<SignalListItem[]> {
@@ -92,40 +117,27 @@ export async function fetchSignalList(): Promise<SignalListItem[]> {
 
   for (const file of reportFiles) {
     tasks.push(
-      fetchFileRaw("report", file).then((raw) => {
-        const fm = parseFrontmatter(raw);
-        if (!fm) return null;
-        return {
-          title: fm.title || file,
-          date: fm.date || "",
-          category: (fm.category as SignalFrontmatter["category"]) || "alpha_signal",
-          lang: (fm.lang as SignalFrontmatter["lang"]) || "en",
-          filename: file,
-          contentLength: raw.length,
-        };
-      }),
+      fetchFileRaw("report", file).then((raw) =>
+        buildSignalItem(file, raw, "alpha_signal"),
+      ),
     );
   }
 
   for (const file of premarketFiles) {
     tasks.push(
-      fetchFileRaw("premarket", file).then((raw) => {
-        const fm = parseFrontmatter(raw);
-        if (!fm) return null;
-        return {
-          title: fm.title || file,
-          date: fm.date || "",
-          category: (fm.category as SignalFrontmatter["category"]) || "alpha_signal_premarket",
-          lang: (fm.lang as SignalFrontmatter["lang"]) || "en",
-          filename: file,
-          contentLength: raw.length,
-        };
-      }),
+      fetchFileRaw("premarket", file).then((raw) =>
+        buildSignalItem(file, raw, "alpha_signal_premarket"),
+      ),
     );
   }
 
-  const results = await Promise.all(tasks);
-  const signals = results.filter((s): s is SignalListItem => s !== null);
+  const results = await Promise.allSettled(tasks);
+  const signals = results
+    .filter(
+      (r): r is PromiseFulfilledResult<SignalListItem> =>
+        r.status === "fulfilled" && r.value !== null,
+    )
+    .map((r) => r.value);
 
   signals.sort((a, b) => b.date.localeCompare(a.date));
 
@@ -137,13 +149,6 @@ export async function fetchSignalMarkdown(
   type: string,
   date: string,
 ): Promise<string> {
-  const pat = process.env.GITHUB_PAT;
-  if (!pat) {
-    throw new Error(
-      "Missing GITHUB_PAT environment variable. Please configure it to fetch remote signal markdown.",
-    );
-  }
-  const repo = REPO;
   const mappedType =
     type === "premarket"
       ? "premarket/alpha_signal_premarket"
@@ -151,14 +156,11 @@ export async function fetchSignalMarkdown(
   const filename =
     lang === "ko" ? `${mappedType}_${date}_ko.md` : `${mappedType}_${date}.md`;
 
-  const url = `https://api.github.com/repos/${repo}/contents/${filename}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `token ${pat}`,
-      Accept: "application/vnd.github.v3.raw",
-    },
-    next: { tags: ["signal"] },
-  });
+  const res = await githubFetch(
+    `https://api.github.com/repos/${REPO}/contents/${filename}`,
+    true,
+  );
+
   if (!res.ok) {
     throw new Error(
       `Failed to fetch markdown file from GitHub: ${res.statusText}`,

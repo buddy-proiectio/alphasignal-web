@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { calcReadingTime, formatReadingTime } from "../utils/reading-time";
 
 export interface ContentItem {
   type: "notice" | "signal";
@@ -9,7 +10,8 @@ export interface ContentItem {
   category?: string;
   lang?: string;
   href: string;
-  contentLength?: number;
+  readingMinutes?: number;
+  excerpt?: string;
 }
 
 interface ContentCardProps {
@@ -23,39 +25,43 @@ function formatDate(dateStr: string): string {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
-    let hours = d.getHours();
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    const period = hours < 12 ? "오전" : "오후";
-    if (hours > 12) hours -= 12;
-    if (hours === 0) hours = 12;
-    return `${year}.${month}.${day}. ${period} ${hours}:${minutes}`;
+    return `${year}.${month}.${day}`;
   } catch {
     return dateStr;
   }
 }
 
-function formatReadingTime(minutes: number): string {
-  if (minutes >= 60) {
-    const h = Math.floor(minutes / 60);
-    return `${h}시간 이상 소요`;
-  }
-  return `${minutes}분 소요`;
-}
-
 export default function ContentCard({ item }: ContentCardProps) {
   const isNotice = item.category === "notice";
-  const readingMinutes = item.contentLength
-    ? Math.max(1, Math.round(item.contentLength / 300))
-    : 1;
+  const readingMinutes = item.readingMinutes ?? 1;
+
+  const itemDate = new Date(item.date);
+  const today = new Date();
+  const isNew =
+    !isNaN(itemDate.getTime()) &&
+    itemDate.getFullYear() === today.getFullYear() &&
+    itemDate.getMonth() === today.getMonth() &&
+    itemDate.getDate() === today.getDate();
 
   return (
     <Link
       href={item.href}
       className="block p-6 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all duration-200"
     >
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 leading-relaxed mb-2">
+      <h3 className="inline-flex items-center text-lg font-semibold text-slate-900 dark:text-slate-50 leading-relaxed mb-2">
+        {isNew && (
+          <span className="inline-flex items-center justify-center w-4 h-4 mr-1.5 rounded-full bg-blue-600 text-white text-[0.5rem] font-bold align-middle">
+            N
+          </span>
+        )}
         {item.title}
       </h3>
+
+      {item.excerpt && (
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-3">
+          {item.excerpt}
+        </p>
+      )}
 
       <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
         {isNotice && (

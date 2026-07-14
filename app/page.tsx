@@ -6,6 +6,8 @@ import Header from "../src/components/Header";
 import FilterBarClient from "../src/components/FilterBarClient";
 import { ContentItem } from "../src/components/ContentCard";
 import { fetchSignalList } from "../src/services/github";
+import { calcReadingTime } from "../src/utils/reading-time";
+import { extractExcerpt } from "../src/utils/extract-excerpt";
 import Analytics from "../src/components/Analytics";
 
 interface NoticeFrontmatter {
@@ -50,7 +52,8 @@ export default async function Home() {
         date: frontmatter.date || "",
         category: "notice",
         href: `/notice/${slug}`,
-        contentLength: source.length,
+        readingMinutes: calcReadingTime(source, "ko"),
+        excerpt: extractExcerpt(source),
       };
     }),
   );
@@ -72,7 +75,8 @@ export default async function Home() {
         category: s.category,
         lang: s.lang,
         href: `/signal/${s.lang}/${s.category === "alpha_signal_premarket" ? "premarket" : "alpha"}/${dateYMD}`,
-        contentLength: s.contentLength,
+        readingMinutes: s.readingMinutes,
+        excerpt: s.excerpt,
       };
     });
   } catch (err) {
