@@ -30,8 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Purge caches
-    // @ts-ignore
-    revalidateTag("signal");
+    revalidateTag("signal", "default");
     return NextResponse.json({ revalidated: true });
   } catch (error) {
     console.error("Revalidation error:", error);

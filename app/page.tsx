@@ -5,6 +5,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import Header from "../src/components/Header";
 import FilterBarClient from "../src/components/FilterBarClient";
 import { ContentItem } from "../src/components/ContentCard";
+import { fetchSignalList } from "../src/services/github";
 import Analytics from "../src/components/Analytics";
 
 interface NoticeFrontmatter {
@@ -49,6 +50,7 @@ export default async function Home() {
         date: frontmatter.date || "",
         category: "notice",
         href: `/notice/${slug}`,
+        contentLength: source.length,
       };
     }),
   );
@@ -56,8 +58,26 @@ export default async function Home() {
   // Sort notices by date descending
   notices.sort((a, b) => getSafeTime(b.date) - getSafeTime(a.date));
 
-  // Define signals (empty for now, will be populated from GitHub API)
-  const signals: ContentItem[] = [];
+  // Fetch signals from GitHub
+  let signals: ContentItem[] = [];
+  try {
+    const signalList = await fetchSignalList();
+    signals = signalList.map((s) => {
+      const d = new Date(s.date);
+      const dateYMD = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+      return {
+        type: "signal" as const,
+        title: s.title,
+        date: s.date,
+        category: s.category,
+        lang: s.lang,
+        href: `/signal/${s.lang}/${s.category === "alpha_signal_premarket" ? "premarket" : "alpha"}/${dateYMD}`,
+        contentLength: s.contentLength,
+      };
+    });
+  } catch (err) {
+    console.warn("Failed to fetch signals from GitHub:", err);
+  }
 
   // Combine all items for "all" category
   const allItems: ContentItem[] = [...notices, ...signals];
