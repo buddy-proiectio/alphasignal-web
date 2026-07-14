@@ -68,7 +68,7 @@ describe("Revalidate Webhook Route Handler", () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.revalidated).toBe(true);
-    expect(revalidateTag).toHaveBeenCalledWith("signal", "default");
+    expect(revalidateTag).toHaveBeenCalledWith("signal");
   });
 
   it("should return 500 when secret is not configured", async () => {

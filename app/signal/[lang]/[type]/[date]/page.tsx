@@ -21,6 +21,16 @@ interface PageProps {
 export default async function SignalDetailPage({ params }: PageProps) {
   const { lang, type, date } = await params;
 
+  if (lang !== "ko" && lang !== "en") {
+    notFound();
+  }
+  if (type !== "alpha" && type !== "premarket") {
+    notFound();
+  }
+  if (!/^\d{8}$/.test(date)) {
+    notFound();
+  }
+
   let rawMarkdown: string;
   try {
     rawMarkdown = await fetchSignalMarkdown(lang, type, date);
