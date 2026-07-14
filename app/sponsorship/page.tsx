@@ -12,7 +12,7 @@ export default function SponsorshipPage() {
   return (
     <>
       <Header />
-      <main className="max-w-[768px] mx-auto px-6 py-10">
+      <main className="max-w-[896px] mx-auto px-6 py-10">
         <header className="mb-10 text-center">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-3">
             후원하기

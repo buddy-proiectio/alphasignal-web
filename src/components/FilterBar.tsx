@@ -22,7 +22,7 @@ export default function FilterBar({
 }: FilterBarProps) {
   return (
     <div className="sticky top-14 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
-      <div className="max-w-[768px] mx-auto px-6 h-12 flex items-center gap-1 overflow-x-auto scrollbar-hide">
+      <div className="max-w-[896px] mx-auto px-6 h-12 flex items-center gap-1 overflow-x-auto scrollbar-hide">
         {categories.map((cat) => (
           <button
             key={cat.value}

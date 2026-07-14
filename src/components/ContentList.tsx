@@ -32,7 +32,7 @@ export default function ContentList({
   const hasMore = items.length > visibleCount;
 
   return (
-    <div className="max-w-[768px] mx-auto px-6 py-8">
+    <div className="max-w-[896px] mx-auto px-6 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {visibleItems.map((item, index) => (
           <ContentCard key={`${item.type}-${item.slug || index}`} item={item} />

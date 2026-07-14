@@ -10,7 +10,7 @@ export default function Header() {
     <>
       <TickerTapeWidget />
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
-      <div className="max-w-[768px] mx-auto px-6 h-14 flex items-center justify-between">
+      <div className="max-w-[896px] mx-auto px-6 h-14 flex items-center justify-between">
         <Link
           href="/"
           className="text-lg font-bold text-slate-900 dark:text-slate-50"
