@@ -19,7 +19,7 @@ export default function ContentList({
   }
 
   return (
-    <div className="max-w-wide mx-auto px-4 py-6 space-y-4">
+    <div className="max-w-[768px] mx-auto px-6 py-8 space-y-4">
       {items.map((item, index) => (
         <ContentCard key={`${item.type}-${item.slug || index}`} item={item} />
       ))}

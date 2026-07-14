@@ -1,16 +1,25 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
-      <div className="max-w-wide mx-auto px-4 h-16 flex items-center justify-between">
-        <a href="/" className="text-xl font-bold text-slate-900 dark:text-slate-50">
+      <div className="max-w-[768px] mx-auto px-6 h-14 flex items-center justify-between">
+        <Link href="/" className="text-lg font-bold text-slate-900 dark:text-slate-50">
           AlphaSignal
-        </a>
-        <ThemeToggle />
+        </Link>
+        <nav className="flex items-center gap-4">
+          <Link
+            href="/sponsorship"
+            className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 transition-colors"
+          >
+            후원하기
+          </Link>
+          <ThemeToggle />
+        </nav>
       </div>
     </header>
   );

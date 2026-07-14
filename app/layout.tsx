@@ -27,7 +27,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
-          {children}
+          <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

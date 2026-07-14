@@ -5,8 +5,6 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import Header from "../src/components/Header";
 import FilterBarClient from "../src/components/FilterBarClient";
 import { ContentItem } from "../src/components/ContentCard";
-import Sponsorship from "../src/components/Sponsorship";
-import Adsense from "../src/components/Adsense";
 import Analytics from "../src/components/Analytics";
 
 interface NoticeFrontmatter {
@@ -69,8 +67,6 @@ export default async function Home() {
       <Analytics gaId="G-BUDDYPREM" />
       <Header />
       <FilterBarClient allItems={allItems} notices={notices} signals={signals} />
-      <Adsense slot="9876543210" />
-      <Sponsorship />
     </>
   );
 }

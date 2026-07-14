@@ -63,7 +63,7 @@ export default function ContentCard({ item }: ContentCardProps) {
   return (
     <Link
       href={item.href}
-      className="block p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm transition-all duration-150"
+      className="block p-6 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-md transition-all duration-200"
     >
       <div className="flex justify-between items-start mb-3">
         {badge && (
@@ -78,11 +78,11 @@ export default function ContentCard({ item }: ContentCardProps) {
         </span>
       </div>
 
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-2 line-clamp-2">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50 mb-2 leading-relaxed">
         {item.title}
       </h3>
 
-      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
         <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
           자세히 보기 &rarr;
         </span>
