@@ -52,7 +52,7 @@ function githubFetch(url: string, raw = false): Promise<Response> {
         ? "application/vnd.github.v3.raw"
         : "application/vnd.github.v3+json",
     },
-    next: { tags: ["signal"], revalidate: false },
+    next: { tags: ["signal"], revalidate: 60 },
     signal: controller.signal,
   }).finally(() => clearTimeout(timer));
 }
