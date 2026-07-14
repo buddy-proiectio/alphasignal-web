@@ -3,7 +3,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 export const metadata = {
-  title: "AlphaSignal",
+  title: "Alpha Signal",
   description: "AI-powered market alpha signals and analysis",
 };
 
