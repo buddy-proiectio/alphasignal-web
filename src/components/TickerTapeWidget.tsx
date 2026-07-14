@@ -15,15 +15,16 @@ export default function TickerTapeWidget() {
   useEffect(() => {
     if (!mounted || !containerRef.current) return;
 
-    // Clear container to avoid duplicate widgets
-    containerRef.current.innerHTML = "";
+    const container = containerRef.current;
+    container.innerHTML = "";
 
     const widgetDiv = document.createElement("div");
     widgetDiv.className = "tradingview-widget-container__widget";
-    containerRef.current.appendChild(widgetDiv);
+    container.appendChild(widgetDiv);
 
     const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
+    script.src =
+      "https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js";
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
@@ -33,26 +34,38 @@ export default function TickerTapeWidget() {
           title: "Dow Jones",
         },
         {
-          proName: "FOREXCOM:SPXUSD",
-          title: "S&P 500",
+          proName: "FOREXCOM:NSXUSD",
+          title: "Nasdaq",
         },
         {
-          proName: "NASDAQ:IXIC",
-          title: "Nasdaq 100",
+          proName: "FOREXCOM:SPXUSD",
+          title: "S&P 500",
         },
         {
           proName: "BINANCE:BTCUSDT",
           title: "Bitcoin",
         },
+        {
+          proName: "CMCMARKETS:GOLD",
+          title: "Gold",
+        },
+        {
+          proName: "FX:USDKRW",
+          title: "KRW/USD",
+        },
       ],
       showSymbolLogo: true,
       isTransparent: true,
-      displayMode: "adaptive",
+      displayMode: "regular",
       colorTheme: theme === "dark" ? "dark" : "light",
       locale: "ko",
     });
 
-    containerRef.current.appendChild(script);
+    container.appendChild(script);
+
+    return () => {
+      container.innerHTML = "";
+    };
   }, [mounted, theme]);
 
   if (!mounted) {
