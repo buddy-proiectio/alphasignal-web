@@ -3,10 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
+import TickerTapeWidget from "./TickerTapeWidget";
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
+    <>
+      <TickerTapeWidget />
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
       <div className="max-w-[768px] mx-auto px-6 h-14 flex items-center justify-between">
         <Link
           href="/"
@@ -25,5 +28,6 @@ export default function Header() {
         </nav>
       </div>
     </header>
+    </>
   );
 }
