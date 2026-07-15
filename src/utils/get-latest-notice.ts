@@ -24,25 +24,32 @@ export async function getLatestNotice(): Promise<NoticeItem | null> {
 
     if (mdxFiles.length === 0) return null;
 
-    const notices = await Promise.all(
+    const noticesResults = await Promise.all(
       mdxFiles.map(async (file) => {
-        const slug = file.replace(/\.mdx?$/, "");
-        const filePath = path.join(dirPath, file);
-        const source = await fs.readFile(filePath, "utf-8");
+        try {
+          const slug = file.replace(/\.mdx?$/, "");
+          const filePath = path.join(dirPath, file);
+          const source = await fs.readFile(filePath, "utf-8");
 
-        const { frontmatter } = await compileMDX<NoticeFrontmatter>({
-          source,
-          options: { parseFrontmatter: true },
-        });
+          const { frontmatter } = await compileMDX<NoticeFrontmatter>({
+            source,
+            options: { parseFrontmatter: true },
+          });
 
-        return {
-          slug,
-          title: frontmatter.title || slug,
-          date: frontmatter.date || "",
-          href: `/notice/${slug}`,
-        };
+          return {
+            slug,
+            title: frontmatter.title || slug,
+            date: frontmatter.date || "",
+            href: `/notice/${slug}`,
+          };
+        } catch (e) {
+          console.warn(`Failed to parse notice ${file}:`, e);
+          return null;
+        }
       }),
     );
+
+    const notices = noticesResults.filter((n): n is NoticeItem => n !== null);
 
     // Sort notices by date descending
     notices.sort((a, b) => {
