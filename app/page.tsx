@@ -142,8 +142,9 @@ export default async function Home({ searchParams }: PageProps) {
 
     if (signals.length > 0) {
       if (selectedDateParam) {
-        const formattedTargetDate = formatDateString(selectedDateParam);
-        currentSignal = signals.find((s) => s.date === formattedTargetDate);
+        currentSignal = signals.find(
+          (s) => s.date.slice(0, 10).replace(/-/g, "") === selectedDateParam,
+        );
 
         if (!currentSignal) {
           currentSignal = signals[0];
@@ -165,7 +166,7 @@ export default async function Home({ searchParams }: PageProps) {
   }
 
   const archiveList = signals.slice(0, 10);
-  const dateYMD = currentSignal ? currentSignal.date.replace(/-/g, "") : "";
+  const dateYMD = currentSignal ? currentSignal.date.slice(0, 10).replace(/-/g, "") : "";
 
   return (
     <>
@@ -285,7 +286,7 @@ export default async function Home({ searchParams }: PageProps) {
                 </h3>
                 <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide snap-x">
                   {archiveList.map((item, idx) => {
-                    const itemYMD = item.date.replace(/-/g, "");
+                    const itemYMD = item.date.slice(0, 10).replace(/-/g, "");
                     const isActive = currentSignal?.date === item.date;
 
                     return (
@@ -335,7 +336,7 @@ export default async function Home({ searchParams }: PageProps) {
               </div>
               <div className="flex flex-col gap-2.5 max-h-[350px] overflow-y-auto pr-1">
                 {archiveList.map((item, idx) => {
-                  const itemYMD = item.date.replace(/-/g, "");
+                  const itemYMD = item.date.slice(0, 10).replace(/-/g, "");
                   const isActive = currentSignal?.date === item.date;
 
                   return (
