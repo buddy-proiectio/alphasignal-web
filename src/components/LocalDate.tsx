@@ -15,10 +15,10 @@ export default function LocalDate({ dateStr }: { dateStr: string }) {
     const dateOnly = dateStr.split("T")[0];
     const parts = dateOnly.split("-");
     if (parts.length === 3) {
-      return <span className="tabular-nums">{`${parts[0]}.${parts[1]}.${parts[2]}.`}</span>;
+      return <span>{`${parts[0]}.${parts[1]}.${parts[2]}.`}</span>;
     }
-    return <span className="tabular-nums">{dateStr}</span>;
+    return <span>{dateStr}</span>;
   }
 
-  return <span className="tabular-nums">{formatted}</span>;
+  return <span>{formatted}</span>;
 }
