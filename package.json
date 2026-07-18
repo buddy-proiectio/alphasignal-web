@@ -6,6 +6,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "format": "pnpm dlx prettier . --check",
+    "format:fix": "pnpm dlx prettier . --check --write",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "postinstall": "node scripts/patch-next-ts.js"

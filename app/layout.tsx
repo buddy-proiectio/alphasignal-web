@@ -31,9 +31,7 @@ export default function RootLayout({
         >
           <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col">
             <Header />
-            <main className="flex-grow">
-              {children}
-            </main>
+            <main className="flex-grow">{children}</main>
             <Footer />
           </div>
         </ThemeProvider>

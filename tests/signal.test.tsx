@@ -25,7 +25,9 @@ describe("SignalDetailPage", () => {
       date: "20260714",
     });
 
-    await expect(SignalDetailPage({ params })).rejects.toThrow("notFound called");
+    await expect(SignalDetailPage({ params })).rejects.toThrow(
+      "notFound called",
+    );
     expect(notFound).toHaveBeenCalled();
   });
 
@@ -36,7 +38,9 @@ describe("SignalDetailPage", () => {
       date: "20260714",
     });
 
-    await expect(SignalDetailPage({ params })).rejects.toThrow("notFound called");
+    await expect(SignalDetailPage({ params })).rejects.toThrow(
+      "notFound called",
+    );
     expect(notFound).toHaveBeenCalled();
   });
 
@@ -47,12 +51,16 @@ describe("SignalDetailPage", () => {
       date: "2026-07-14",
     });
 
-    await expect(SignalDetailPage({ params })).rejects.toThrow("notFound called");
+    await expect(SignalDetailPage({ params })).rejects.toThrow(
+      "notFound called",
+    );
     expect(notFound).toHaveBeenCalled();
   });
 
   it("should allow valid params and fetch markdown", async () => {
-    vi.mocked(fetchSignalMarkdown).mockResolvedValueOnce("---\ntitle: Test\n---\nContent");
+    vi.mocked(fetchSignalMarkdown).mockResolvedValueOnce(
+      "---\ntitle: Test\n---\nContent",
+    );
     const params = Promise.resolve({
       lang: "ko",
       type: "alpha",
