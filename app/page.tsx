@@ -391,32 +391,6 @@ export default async function Home({ searchParams }: PageProps) {
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4">
             <Adsense slot="sidebar_vertical_banner" format="vertical" />
           </div>
-
-          {/* TradingView Discount Referral Card */}
-          <div className="bg-slate-950 text-slate-100 rounded-xl p-5 border border-slate-800 relative overflow-hidden flex flex-col gap-4">
-            <div className="absolute top-[-30px] right-[-30px] w-20 h-20 bg-blue-500/20 rounded-full blur-xl" />
-            <div className="flex items-center gap-2">
-              <span className="text-xl">📈</span>
-              <span className="font-bold text-xs tracking-wider text-blue-400 uppercase font-mono">
-                TradingView partner
-              </span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <h4 className="text-sm font-bold">트레이딩뷰 최대 할인 혜택</h4>
-              <p className="text-[11px] text-slate-400 leading-normal">
-                파트너 레퍼럴 링크로 가입하고 프리미엄 차트 기능 및 실시간
-                데이터 할인 혜택을 받아보세요.
-              </p>
-            </div>
-            <a
-              href="https://kr.tradingview.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 block text-center bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs py-2 px-4 rounded-lg transition-colors"
-            >
-              할인 혜택 받으러 가기
-            </a>
-          </div>
         </aside>
       </div>
     </div>
