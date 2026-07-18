@@ -1,30 +1,62 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
 interface SupportProps {
   fairyLink?: string;
+  contactEmail?: string;
 }
 
 export default function Support({
   fairyLink = "https://fairy.hada.io/@alphasignals#support",
+  contactEmail = "support@alphasignals.co",
 }: SupportProps) {
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(contactEmail);
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy email:", err);
+    }
+  };
+
   return (
     <div className="max-w-[640px] mx-auto flex flex-col gap-12 items-center text-center">
-      <div className="flex flex-col items-center gap-3 w-full">
+      {/* 1. Main Action Area: Support & Contact */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+        {/* Fairy Support Link */}
         <a
           href={fairyLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white px-10 py-3 rounded-xl text-base font-bold w-full sm:w-auto transition-all hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+          className="inline-flex items-center justify-center gap-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white px-8 py-3.5 rounded-xl text-base font-bold w-full sm:w-auto transition-all hover:-translate-y-0.5 shadow-md hover:shadow-lg cursor-pointer"
         >
-          🧚 후원하기
+          🧚 Fairy에서 후원하기
         </a>
+
+        {/* Email Inquiry Button */}
+        <button
+          onClick={handleCopyEmail}
+          className="inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-8 py-3.5 rounded-xl text-base font-bold w-full sm:w-auto transition-all hover:-translate-y-0.5 border border-slate-200 dark:border-slate-700 cursor-pointer"
+        >
+          ✉️ {emailCopied ? "이메일 복사 완료!" : "공식 이메일 문의"}
+        </button>
       </div>
 
+      <p className="text-sm text-slate-400 dark:text-slate-500 -mt-8">
+        Fairy를 통한 창작자 후원 또는 이메일을 통한 제휴 및 서비스 관련 문의가
+        가능합니다.
+      </p>
+
+      {/* Divider */}
       <div className="w-full h-px bg-slate-200 dark:bg-slate-800/80" />
 
+      {/* 2. Explanations below (🌱 Why & 🎁 Benefits) */}
       <div className="flex flex-col gap-8 text-left w-full">
+        {/* Why Support? */}
         <div className="flex flex-col gap-2">
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
             <span>🌱</span> 왜 후원이 필요한가요?

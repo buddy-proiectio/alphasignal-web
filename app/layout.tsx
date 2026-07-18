@@ -5,9 +5,48 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Alpha Signals",
-  // TODO
-  description: "AI-powered market alpha signals and analysis",
+  title: {
+    default: "알파시그널 (AlphaSignal) | 깨끗한 미국 주식 리포트",
+    template: "%s | 알파시그널",
+  },
+  description:
+    "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 자체 개발 AI 알고리즘이 추출한 미국 주식 매크로 지표, 실시간 주요 외신, SEC 공시 분석을 선제적으로 제공하는 100% 순수 데이터 리포트 매체입니다.",
+  metadataBase: new URL("https://alphasignals.co"),
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/icon.svg",
+  },
+  openGraph: {
+    title: "알파시그널 (AlphaSignal) | 깨끗한 미국 주식 리포트",
+    description:
+      "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 광고와 소음이 배제된 미국 주식 1차 출처 데이터 리포트.",
+    url: "https://alphasignals.co",
+    siteName: "AlphaSignal",
+    locale: "ko_KR",
+    type: "website",
+    images: [
+      {
+        url: "/logo-light.png",
+        width: 512,
+        height: 512,
+        alt: "AlphaSignal Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "알파시그널 (AlphaSignal) | 깨끗한 미국 주식 리포트",
+    description:
+      "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 광고와 소음이 배제된 미국 주식 1차 출처 데이터 리포트.",
+    images: ["/logo-light.png"],
+  },
 };
 
 export default function RootLayout({
