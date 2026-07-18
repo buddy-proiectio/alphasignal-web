@@ -9,7 +9,7 @@ export default function Footer() {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px]">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-700 dark:text-slate-300">
-              ALPHA SIGNAL
+              ALPHA SIGNALS
             </span>
             <span>© {new Date().getFullYear()} All rights reserved.</span>
           </div>
@@ -20,8 +20,8 @@ export default function Footer() {
             <Link href="/archive" className="hover:underline">
               아카이브
             </Link>
-            <Link href="/sponsorship" className="hover:underline">
-              후원하기
+            <Link href="/support" className="hover:underline">
+              지원하기
             </Link>
           </div>
         </div>

@@ -5,7 +5,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Alpha Signal",
+  title: "Alpha Signals",
+  // TODO
   description: "AI-powered market alpha signals and analysis",
 };
 

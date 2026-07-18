@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "404 - 페이지를 찾을 수 없습니다 | AlphaSignal",
+  title: "404 - 페이지를 찾을 수 없습니다 | Alpha Signals",
   description: "요청하신 페이지를 찾을 수 없습니다. 주소를 확인해주세요.",
 };
 

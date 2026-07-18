@@ -25,15 +25,15 @@ export default async function Header() {
             href="/"
             className="text-lg font-bold text-slate-900 dark:text-slate-50 tracking-tight"
           >
-            ALPHA SIGNAL
+            ALPHA SIGNALS
           </Link>
           <nav className="flex items-center gap-4 sm:gap-6">
             <TimeTicker />
             <Link
-              href="/sponsorship"
+              href="/support"
               className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 transition-colors"
             >
-              후원하기
+              지원하기
             </Link>
             <ThemeToggle />
           </nav>

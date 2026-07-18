@@ -28,10 +28,10 @@ export default function Disclaimer() {
         <li>
           서비스 운영에 관한 질문은{" "}
           <Link
-            href="/sponsorship"
+            href="/support"
             className="underline hover:text-blue-600 dark:hover:text-blue-400 font-semibold"
           >
-            후원 및 문의 안내 채널
+            지원 및 문의 안내 채널
           </Link>
           을 통해 문의하여 주시기 바랍니다. 리포트의 해석 또는 투자 판단에
           영향을 미치는 문의에는 답변하지 않습니다.
