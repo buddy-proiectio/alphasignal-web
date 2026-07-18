@@ -176,7 +176,7 @@ export default async function Home({ searchParams }: PageProps) {
     fetchError = "데이터베이스 연결 실패. 잠시 후 다시 시도해주세요.";
   }
 
-  const archiveList = signals.slice(0, 10);
+  const archiveList = signals.slice(0, 5);
   const dateYMD = currentSignal
     ? currentSignal.date.slice(0, 10).replace(/-/g, "")
     : "";
@@ -354,7 +354,7 @@ export default async function Home({ searchParams }: PageProps) {
                   더보기 <span className="text-[10px]">→</span>
                 </Link>
               </div>
-              <div className="flex flex-col gap-2.5 min-h-[300px] max-h-[350px] overflow-y-auto pr-1">
+              <div className="flex flex-col gap-2.5">
                 {archiveList.map((item, idx) => {
                   const itemYMD = item.date.slice(0, 10).replace(/-/g, "");
                   const isActive = currentSignal?.date === item.date;
