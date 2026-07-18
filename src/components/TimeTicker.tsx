@@ -35,7 +35,7 @@ export default function TimeTicker() {
 
   if (!mounted) {
     return (
-      <div className="hidden sm:flex items-center gap-4 text-[10px] font-mono text-slate-400 dark:text-slate-500">
+      <div className="hidden sm:flex items-center gap-4 text-[10px] text-slate-400 dark:text-slate-500">
         <span>SEL --:--</span>
         <span>NYC --:--</span>
       </div>
@@ -43,12 +43,12 @@ export default function TimeTicker() {
   }
 
   return (
-    <div className="hidden sm:flex items-center gap-4 text-[10px] font-mono text-slate-500 dark:text-slate-400">
+    <div className="hidden sm:flex items-center gap-4 text-[10px] text-slate-500 dark:text-slate-400">
       <div className="flex items-center gap-1">
         <span className="text-slate-400 dark:text-slate-500 font-semibold">
           SEL
         </span>
-        <span className="text-slate-700 dark:text-slate-300 tabular-nums">
+        <span className="text-slate-700 dark:text-slate-300">
           {seoulTime}
         </span>
       </div>
@@ -56,7 +56,7 @@ export default function TimeTicker() {
         <span className="text-slate-400 dark:text-slate-500 font-semibold">
           NYC
         </span>
-        <span className="text-slate-700 dark:text-slate-300 tabular-nums">
+        <span className="text-slate-700 dark:text-slate-300">
           {nyTime}
         </span>
       </div>
