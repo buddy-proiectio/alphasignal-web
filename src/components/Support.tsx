@@ -11,27 +11,20 @@ export default function Support({
 }: SupportProps) {
   return (
     <div className="max-w-[640px] mx-auto flex flex-col gap-12 items-center text-center">
-      {/* 1. Simple, Direct Call-to-Action (No extra wrapper box) */}
       <div className="flex flex-col items-center gap-3 w-full">
         <a
           href={fairyLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white px-10 py-4 rounded-xl text-base font-bold w-full sm:w-auto transition-all hover:-translate-y-0.5 shadow-md hover:shadow-lg"
+          className="inline-flex items-center justify-center gap-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white px-10 py-3 rounded-xl text-base font-bold w-full sm:w-auto transition-all hover:-translate-y-0.5 shadow-md hover:shadow-lg"
         >
-          🧚 Fairy에서 후원하기
+          🧚 후원하기
         </a>
-        <p className="text-sm text-slate-400 dark:text-slate-500">
-          창작자 후원 플랫폼 Fairy를 통해 따뜻한 응원을 전하실 수 있습니다.
-        </p>
       </div>
 
-      {/* Divider */}
       <div className="w-full h-px bg-slate-200 dark:bg-slate-800/80" />
 
-      {/* 2. Explanations below (🌱 Why & 🎁 Benefits) */}
       <div className="flex flex-col gap-8 text-left w-full">
-        {/* Why Support? */}
         <div className="flex flex-col gap-2">
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 flex items-center gap-2">
             <span>🌱</span> 왜 후원이 필요한가요?
