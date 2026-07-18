@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import { getLatestNotice } from "@/utils/get-latest-notice";
+import TimeTicker from "@/components/TimeTicker";
 
 // TODO: real-time market data, not hard coding
 const marketData = [
@@ -63,7 +64,8 @@ export default async function Header() {
           >
             ALPHA SIGNAL
           </Link>
-          <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-4 sm:gap-6">
+            <TimeTicker />
             <Link
               href="/sponsorship"
               className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-50 transition-colors"

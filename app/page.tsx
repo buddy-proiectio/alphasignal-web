@@ -31,6 +31,55 @@ const getKstDateString = () => {
   return kst.toISOString().split("T")[0]; // YYYY-MM-DD
 };
 
+function isUsMarketHoliday(date: Date): boolean {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  const ymd = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+  const holidays2026 = [
+    "2026-01-01", // New Year
+    "2026-01-19", // MLK
+    "2026-02-16", // President's Day
+    "2026-04-03", // Good Friday
+    "2026-05-25", // Memorial Day
+    "2026-06-19", // Juneteenth
+    "2026-07-03", // Independence Day (Observed)
+    "2026-09-07", // Labor Day
+    "2026-11-26", // Thanksgiving
+    "2026-12-25", // Christmas
+  ];
+
+  return holidays2026.includes(ymd);
+}
+
+function shouldShowFallbackWarning(activeTab: "alpha" | "premarket", hasTodayReport: boolean): boolean {
+  if (hasTodayReport) return false;
+
+  // Get current time in KST (UTC+9)
+  const nowUtc = new Date().getTime();
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const nowKst = new Date(nowUtc + kstOffset);
+
+  const dayOfWeek = nowKst.getDay(); // 0 = Sunday, 6 = Saturday
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  if (isWeekend) return false;
+
+  if (isUsMarketHoliday(nowKst)) return false;
+
+  const currentHour = nowKst.getHours();
+  const currentMinute = nowKst.getMinutes();
+  const currentTimeVal = currentHour * 60 + currentMinute;
+
+  if (activeTab === "alpha") {
+    const threshold = 20 * 60 + 30; // 20:30
+    return currentTimeVal >= threshold;
+  } else {
+    const threshold = 23 * 60 + 10; // 23:10
+    return currentTimeVal >= threshold;
+  }
+}
+
 export default async function Home({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
   const activeTab = resolvedParams.tab === "premarket" ? "premarket" : "alpha";
@@ -70,9 +119,10 @@ export default async function Home({ searchParams }: PageProps) {
         // No date specified: take latest
         currentSignal = signals[0];
 
-        // If latest signal is not today's date, mark as fallback alert
+        // Only warn if today's report is missing AND it's past the publish threshold on a trading day
         const todayKst = getKstDateString();
-        if (currentSignal.date !== todayKst) {
+        const hasTodayReport = currentSignal?.date === todayKst;
+        if (shouldShowFallbackWarning(activeTab, hasTodayReport)) {
           isRollback = true;
         }
       }
