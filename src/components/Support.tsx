@@ -1,32 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 
 interface SupportProps {
   fairyLink?: string;
-  bankName?: string;
-  accountNumber?: string;
-  accountHolder?: string;
 }
 
 export default function Support({
-  fairyLink = "https://fairy.hada.io/@geeknews",
-  bankName = "토스뱅크",
-  accountNumber = "1000-1234-5678",
-  accountHolder = "(주)버디프리미엄",
+  fairyLink = "https://fairy.hada.io/@alphasignals#support",
 }: SupportProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(accountNumber);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy account number:", err);
-    }
-  };
-
   return (
     <div className="max-w-[768px] mx-auto flex flex-col gap-10">
       {/* 1. Value Proposition Grid */}
@@ -64,80 +46,29 @@ export default function Support({
         </div>
       </div>
 
-      {/* 2. Support Action Cards */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-6 sm:p-8 flex flex-col gap-6 shadow-xs">
-        <div className="text-center max-w-md mx-auto flex flex-col gap-1.5">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
-            알파시그널 지원 방법
+      {/* 2. Single Action Card */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl p-8 sm:p-10 flex flex-col items-center text-center gap-6 shadow-xs max-w-lg mx-auto w-full">
+        <div className="flex flex-col gap-2">
+          <span className="inline-flex self-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/50">
+            Fairy Platform
+          </span>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mt-1">
+            공식 후원 채널 바로가기
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-            국내 창작자 후원 플랫폼인 Fairy를 통해 간편하게 응원하시거나, 계좌
-            이체를 통해 마음을 보태주실 수 있습니다.
+            창작자 후원 플랫폼 Fairy를 통해 따뜻한 응원을 전하실 수 있습니다.
+            커피 한 잔 값을 구독하거나 일시 후원하여 주실 수 있습니다.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch mt-2">
-          {/* Option A: Fairy platform */}
-          <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/50">
-            <div className="flex flex-col gap-1.5">
-              <span className="inline-flex self-start px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
-                Fairy Platform
-              </span>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-slate-50">
-                창작자 후원 채널
-              </h4>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                커피 한 잔 값을 구독하거나 일시 후원하여 주기적으로 서비스를
-                지탱할 수 있습니다.
-              </p>
-            </div>
-            <a
-              href={fairyLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white px-4 py-2.5 rounded-lg text-xs font-bold w-full transition-all hover:-translate-y-0.5 shadow-xs"
-            >
-              🧚 Fairy에서 응원하기
-            </a>
-          </div>
-
-          {/* Option B: Account Transfer */}
-          <div className="border border-slate-200 dark:border-slate-800 rounded-xl p-5 flex flex-col justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/50">
-            <div className="flex flex-col gap-1.5">
-              <span className="inline-flex self-start px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
-                Direct Transfer
-              </span>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-slate-50">
-                직접 계좌 송금
-              </h4>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                중개 수수료 없이 직접 계좌를 통해 일시 금액을 송금하여 후원하실
-                수 있습니다.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3.5 py-2.5 rounded-lg w-full text-xs">
-              <div className="text-left flex flex-col gap-0.5">
-                <span className="font-bold text-slate-900 dark:text-slate-50">
-                  {bankName} {accountNumber}
-                </span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                  예금주: {accountHolder}
-                </span>
-              </div>
-              <button
-                onClick={handleCopy}
-                className={`px-2.5 py-1.5 rounded-md font-semibold text-[10px] transition-colors border ${
-                  copied
-                    ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-250 dark:border-emerald-800"
-                    : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750"
-                }`}
-              >
-                {copied ? "복사완료" : "복사"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <a
+          href={fairyLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-2 bg-[#4f46e5] hover:bg-[#4338ca] text-white px-8 py-3 rounded-xl text-sm font-bold w-full max-w-xs transition-all hover:-translate-y-0.5 shadow-[0_4px_12px_rgba(79,70,229,0.25)]"
+        >
+          🧚 Fairy에서 후원하기
+        </a>
       </div>
     </div>
   );
