@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { fetchSignalMarkdown, fetchSignalList } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Header from "@/components/Header";
-import { formatSignalDate } from "@/utils/format-date";
+import LocalDate from "@/components/LocalDate";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -86,8 +86,8 @@ export default async function SignalDetailPage({ params }: PageProps) {
             {frontmatter.title ||
               `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
           </h1>
-          <time suppressHydrationWarning className="text-slate-500 dark:text-slate-400 text-sm">
-            {formatSignalDate(frontmatter.date || date)}
+          <time className="text-slate-500 dark:text-slate-400 text-sm">
+            <LocalDate dateStr={frontmatter.date || date} />
           </time>
         </header>
 
