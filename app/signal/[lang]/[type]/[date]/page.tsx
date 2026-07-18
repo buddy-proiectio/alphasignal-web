@@ -11,7 +11,7 @@ export async function generateStaticParams() {
   try {
     const list = await fetchSignalList();
     return list.map((s) => {
-      const dateYMD = s.date.replace(/-/g, "");
+      const dateYMD = s.date.slice(0, 10).replace(/-/g, "");
       return {
         lang: s.lang,
         type: s.category === "alpha_signal_premarket" ? "premarket" : "alpha",
