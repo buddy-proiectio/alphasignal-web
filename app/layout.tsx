@@ -1,6 +1,7 @@
 import React from "react";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Alpha Signal",
@@ -27,8 +28,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
-          <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-            {children}
+          <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col">
+            <div className="flex-grow">
+              {children}
+            </div>
+            <Footer />
           </div>
         </ThemeProvider>
       </body>
