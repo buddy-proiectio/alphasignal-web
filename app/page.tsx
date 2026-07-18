@@ -5,6 +5,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import { formatSignalDate } from "@/utils/format-date";
 import { isUsMarketHoliday } from "@/utils/us-market-holidays";
+import LocalDate from "@/components/LocalDate";
 
 interface PageProps {
   searchParams: Promise<{
@@ -214,7 +215,7 @@ export default async function Home({ searchParams }: PageProps) {
                   {currentSignal.title}
                 </h1>
                 <time className="text-xs text-slate-500 dark:text-slate-400">
-                  {formatSignalDate(currentSignal.date)}
+                  <LocalDate dateStr={currentSignal.date} />
                 </time>
               </div>
             )}
@@ -265,7 +266,7 @@ export default async function Home({ searchParams }: PageProps) {
                             : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                         }`}
                       >
-                        <time className="block text-[10px] font-mono text-slate-400 dark:text-slate-500 mb-1">
+                        <time className="block text-[10px] text-slate-400 dark:text-slate-500 mb-1">
                           {formatSignalDate(item.date)}
                         </time>
                         <h4 className="text-xs font-bold line-clamp-2 leading-snug">
@@ -275,6 +276,12 @@ export default async function Home({ searchParams }: PageProps) {
                     );
                   })}
                 </div>
+                <Link
+                  href={`/archive?tab=${activeTab}&lang=${activeLang}`}
+                  className="mt-2 block text-center border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs py-2 px-4 rounded-lg transition-colors"
+                >
+                  📅 지난 리포트 전체 보기 (아카이브)
+                </Link>
               </div>
             </div>
           </div>
@@ -302,7 +309,7 @@ export default async function Home({ searchParams }: PageProps) {
                           : "hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                       }`}
                     >
-                      <time className="block text-[10px] font-mono text-slate-400 dark:text-slate-500 mb-0.5">
+                      <time className="block text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">
                         {formatSignalDate(item.date)}
                       </time>
                       <h4 className="text-xs line-clamp-1 leading-snug">
@@ -312,6 +319,12 @@ export default async function Home({ searchParams }: PageProps) {
                   );
                 })}
               </div>
+              <Link
+                href={`/archive?tab=${activeTab}&lang=${activeLang}`}
+                className="mt-2 block text-center border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs py-2 px-4 rounded-lg transition-colors"
+              >
+                📅 지난 리포트 전체 보기 (아카이브)
+              </Link>
             </div>
 
             {/* Google Adsense Vertical Slot */}
