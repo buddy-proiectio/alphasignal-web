@@ -294,9 +294,17 @@ export default async function Home({ searchParams }: PageProps) {
 
               {/* Archive Section */}
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                  <span>📅</span> 지난 리포트 보러가기
-                </h3>
+                <div className="flex items-center justify-between pb-1">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                    <span>📅</span> 지난 리포트 보러가기
+                  </h3>
+                  <Link
+                    href={`/archive?tab=${activeTab}&lang=${activeLang}`}
+                    className="text-slate-400 hover:text-slate-950 dark:hover:text-slate-100 transition-colors text-xs font-semibold flex items-center gap-0.5"
+                  >
+                    더보기 <span className="text-[10px]">→</span>
+                  </Link>
+                </div>
                 <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide snap-x">
                   {archiveList.map((item, idx) => {
                     const itemYMD = item.date.slice(0, 10).replace(/-/g, "");
@@ -313,21 +321,20 @@ export default async function Home({ searchParams }: PageProps) {
                         }`}
                       >
                         <time className="block text-[10px] text-slate-400 dark:text-slate-500 mb-1">
-                          {formatSignalDate(item.date)}
+                          <LocalDate dateStr={item.date} />
                         </time>
                         <h4 className="text-xs font-bold line-clamp-2 leading-snug">
                           {item.title}
                         </h4>
+                        {item.excerpt && (
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
+                            {item.excerpt}
+                          </p>
+                        )}
                       </Link>
                     );
                   })}
                 </div>
-                <Link
-                  href={`/archive?tab=${activeTab}&lang=${activeLang}`}
-                  className="mt-2 block text-center border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs py-2 px-4 rounded-lg transition-colors"
-                >
-                  📅 지난 리포트 전체 보기 (아카이브)
-                </Link>
               </div>
             </div>
           </div>
@@ -347,7 +354,7 @@ export default async function Home({ searchParams }: PageProps) {
                   더보기 <span className="text-[10px]">→</span>
                 </Link>
               </div>
-              <div className="flex flex-col gap-2.5 max-h-[350px] overflow-y-auto pr-1">
+              <div className="flex flex-col gap-2.5 min-h-[300px] max-h-[350px] overflow-y-auto pr-1">
                 {archiveList.map((item, idx) => {
                   const itemYMD = item.date.slice(0, 10).replace(/-/g, "");
                   const isActive = currentSignal?.date === item.date;
@@ -363,11 +370,16 @@ export default async function Home({ searchParams }: PageProps) {
                       }`}
                     >
                       <time className="block text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">
-                        <LocalDate dateStr={formatSignalDate(item.date)} />
+                        <LocalDate dateStr={item.date} />
                       </time>
-                      <h4 className="text-xs line-clamp-1 leading-snug">
+                      <h4 className="text-xs line-clamp-1 leading-snug font-medium">
                         {item.title}
                       </h4>
+                      {item.excerpt && (
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5 leading-relaxed">
+                          {item.excerpt}
+                        </p>
+                      )}
                     </Link>
                   );
                 })}
