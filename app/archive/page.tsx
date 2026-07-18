@@ -140,7 +140,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
                         </p>
                       )}
                     </div>
-                    <time className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap self-start sm:self-center">
+                    <time className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap self-start sm:self-end-safe">
                       <LocalDate dateStr={item.date} />
                     </time>
                   </Link>
