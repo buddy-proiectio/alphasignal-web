@@ -6,6 +6,63 @@ import Link from "next/link";
 import { formatSignalDate } from "@/utils/format-date";
 import { isUsMarketHoliday } from "@/utils/us-market-holidays";
 import LocalDate from "@/components/LocalDate";
+import { Suspense } from "react";
+
+function ReportSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4 py-4">
+      <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+      <div className="space-y-2">
+        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded"></div>
+        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-5/6"></div>
+        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-2/3"></div>
+      </div>
+      <div className="space-y-2 pt-4">
+        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-4/5"></div>
+        <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded"></div>
+      </div>
+    </div>
+  );
+}
+
+interface ReportViewerContentProps {
+  activeLang: "ko" | "en";
+  activeTab: "alpha" | "premarket";
+  dateYMD: string;
+}
+
+async function ReportViewerContent({
+  activeLang,
+  activeTab,
+  dateYMD,
+}: ReportViewerContentProps) {
+  try {
+    const rawMarkdown = await fetchSignalMarkdown(
+      activeLang,
+      activeTab,
+      dateYMD,
+    );
+
+    const { content } = await compileMDX<SignalFrontmatter>({
+      source: rawMarkdown,
+      options: { parseFrontmatter: true },
+    });
+
+    return (
+      <article className="prose dark:prose-invert max-w-none prose-sm sm:prose-base">
+        {content}
+      </article>
+    );
+  } catch (err) {
+    console.error("Failed to fetch markdown file:", err);
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-600 gap-2">
+        <span className="text-3xl">⚠️</span>
+        <p className="text-sm font-medium">리포트 본문 데이터를 가져오지 못했습니다.</p>
+      </div>
+    );
+  }
+}
 
 interface PageProps {
   searchParams: Promise<{
@@ -72,13 +129,10 @@ export default async function Home({ searchParams }: PageProps) {
   let signals: any[] = [];
   let currentSignal: any = null;
   let isRollback = false;
-  let rawMarkdown = "";
-  let mdxCompiled: any = null;
   let fetchError = "";
 
   try {
     const list = await fetchSignalList();
-    // Filter signals by tab and language
     const targetCategory =
       activeTab === "premarket" ? "alpha_signal_premarket" : "alpha_signal";
 
@@ -92,41 +146,16 @@ export default async function Home({ searchParams }: PageProps) {
         currentSignal = signals.find((s) => s.date === formattedTargetDate);
 
         if (!currentSignal) {
-          // Date specified but not found: rollback to latest
           currentSignal = signals[0];
           isRollback = true;
         }
       } else {
-        // No date specified: take latest
         currentSignal = signals[0];
 
-        // Only warn if today's report is missing AND it's past the publish threshold on a trading day
         const todayKst = getKstDateString();
         const hasTodayReport = currentSignal?.date === todayKst;
         if (shouldShowFallbackWarning(activeTab, hasTodayReport)) {
           isRollback = true;
-        }
-      }
-
-      if (currentSignal) {
-        const d = new Date(currentSignal.date);
-        const dateYMD = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-
-        try {
-          rawMarkdown = await fetchSignalMarkdown(
-            activeLang,
-            activeTab,
-            dateYMD,
-          );
-
-          const { content } = await compileMDX<SignalFrontmatter>({
-            source: rawMarkdown,
-            options: { parseFrontmatter: true },
-          });
-          mdxCompiled = content;
-        } catch (err) {
-          console.error("Failed to fetch markdown file:", err);
-          fetchError = "리포트 본문 데이터를 가져오지 못했습니다.";
         }
       }
     }
@@ -135,8 +164,8 @@ export default async function Home({ searchParams }: PageProps) {
     fetchError = "데이터베이스 연결 실패. 잠시 후 다시 시도해주세요.";
   }
 
-  // Get recent 10 days archive
   const archiveList = signals.slice(0, 10);
+  const dateYMD = currentSignal ? currentSignal.date.replace(/-/g, "") : "";
 
   return (
     <>
@@ -227,10 +256,14 @@ export default async function Home({ searchParams }: PageProps) {
                   <span className="text-3xl">⚠️</span>
                   <p className="text-sm font-medium">{fetchError}</p>
                 </div>
-              ) : mdxCompiled ? (
-                <article className="prose dark:prose-invert max-w-none prose-sm sm:prose-base">
-                  {mdxCompiled}
-                </article>
+              ) : currentSignal ? (
+                <Suspense fallback={<ReportSkeleton />}>
+                  <ReportViewerContent
+                    activeLang={activeLang}
+                    activeTab={activeTab}
+                    dateYMD={dateYMD}
+                  />
+                </Suspense>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-600 gap-2">
                   <span className="text-3xl">📁</span>
@@ -252,8 +285,7 @@ export default async function Home({ searchParams }: PageProps) {
                 </h3>
                 <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide snap-x">
                   {archiveList.map((item, idx) => {
-                    const itemD = new Date(item.date);
-                    const itemYMD = `${itemD.getFullYear()}${String(itemD.getMonth() + 1).padStart(2, "0")}${String(itemD.getDate()).padStart(2, "0")}`;
+                    const itemYMD = item.date.replace(/-/g, "");
                     const isActive = currentSignal?.date === item.date;
 
                     return (
@@ -290,13 +322,20 @@ export default async function Home({ searchParams }: PageProps) {
           <aside className="hidden lg:block sticky top-24 flex flex-col gap-6">
             {/* Archive Section */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4 flex flex-col gap-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <span>📅</span> 지난 리포트 아카이브
-              </h3>
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                  <span>📅</span> 지난 리포트 아카이브
+                </h3>
+                <Link
+                  href={`/archive?tab=${activeTab}&lang=${activeLang}`}
+                  className="text-slate-400 hover:text-slate-950 dark:hover:text-slate-100 transition-colors text-xs font-semibold flex items-center gap-0.5"
+                >
+                  더보기 <span className="text-[10px]">→</span>
+                </Link>
+              </div>
               <div className="flex flex-col gap-2.5 max-h-[350px] overflow-y-auto pr-1">
                 {archiveList.map((item, idx) => {
-                  const itemD = new Date(item.date);
-                  const itemYMD = `${itemD.getFullYear()}${String(itemD.getMonth() + 1).padStart(2, "0")}${String(itemD.getDate()).padStart(2, "0")}`;
+                  const itemYMD = item.date.replace(/-/g, "");
                   const isActive = currentSignal?.date === item.date;
 
                   return (
@@ -319,12 +358,6 @@ export default async function Home({ searchParams }: PageProps) {
                   );
                 })}
               </div>
-              <Link
-                href={`/archive?tab=${activeTab}&lang=${activeLang}`}
-                className="mt-2 block text-center border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs py-2 px-4 rounded-lg transition-colors"
-              >
-                📅 지난 리포트 전체 보기 (아카이브)
-              </Link>
             </div>
 
             {/* Google Adsense Vertical Slot */}

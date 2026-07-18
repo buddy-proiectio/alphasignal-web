@@ -125,8 +125,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
             ) : paginatedSignals.length > 0 ? (
               <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {paginatedSignals.map((item, index) => {
-                  const d = new Date(item.date);
-                  const dateYMD = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+                  const dateYMD = item.date.replace(/-/g, "");
 
                   return (
                     <Link
