@@ -29,9 +29,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
-          <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col">
+          <div className="min-h-screen bg-[--background] text-[--foreground] flex flex-col">
             <Header />
-            <main className="flex-grow">{children}</main>
+            <main className="grow">{children}</main>
             <Footer />
           </div>
         </ThemeProvider>

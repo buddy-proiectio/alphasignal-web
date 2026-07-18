@@ -28,7 +28,7 @@ export default function Sponsorship({
   };
 
   return (
-    <div className="max-w-md mx-auto my-8 p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg text-center">
+    <div className="max-w-md mx-auto my-8 p-6 bg-linear-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg text-center">
       <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2">
         Premium Support &amp; Sponsorship
       </h3>
