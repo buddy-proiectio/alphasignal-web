@@ -47,7 +47,7 @@ export default function Support({
       </div>
 
       <p className="text-sm text-slate-400 dark:text-slate-500 -mt-8">
-        Fairy를 통한 창작자 후원 또는 이메일을 통한 제휴 및 서비스 관련 문의가
+        Fairy를 통한 후원 또는 이메일을 통한 제휴 및 서비스 관련 문의가
         가능합니다.
       </p>
 
