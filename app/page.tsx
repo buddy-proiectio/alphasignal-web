@@ -4,6 +4,7 @@ import { fetchSignalList, fetchSignalMarkdown } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import { formatSignalDate } from "@/utils/format-date";
+import { isUsMarketHoliday } from "@/utils/us-market-holidays";
 
 interface PageProps {
   searchParams: Promise<{
@@ -31,27 +32,6 @@ const getKstDateString = () => {
   return kst.toISOString().split("T")[0]; // YYYY-MM-DD
 };
 
-function isUsMarketHoliday(date: Date): boolean {
-  const y = date.getFullYear();
-  const m = date.getMonth() + 1;
-  const d = date.getDate();
-  const ymd = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-
-  const holidays2026 = [
-    "2026-01-01", // New Year
-    "2026-01-19", // MLK
-    "2026-02-16", // President's Day
-    "2026-04-03", // Good Friday
-    "2026-05-25", // Memorial Day
-    "2026-06-19", // Juneteenth
-    "2026-07-03", // Independence Day (Observed)
-    "2026-09-07", // Labor Day
-    "2026-11-26", // Thanksgiving
-    "2026-12-25", // Christmas
-  ];
-
-  return holidays2026.includes(ymd);
-}
 
 function shouldShowFallbackWarning(activeTab: "alpha" | "premarket", hasTodayReport: boolean): boolean {
   if (hasTodayReport) return false;
