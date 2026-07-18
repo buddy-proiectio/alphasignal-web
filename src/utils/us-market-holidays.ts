@@ -127,13 +127,21 @@ export function getUsMarketHolidays(year: number): Set<string> {
 }
 
 export function isUsMarketHoliday(date: Date): boolean {
-  // Format given date as YYYY-MM-DD in KST (since the date passed represents today's date in KST)
-  // Or check in local EST? KST date matches trading day date of NYSE because NYSE publishes KST time on that day
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
+  // Format given date as YYYY-MM-DD in KST timezone
+  const kstParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const y = kstParts.find(p => p.type === "year")?.value;
+  const m = kstParts.find(p => p.type === "month")?.value;
+  const d = kstParts.find(p => p.type === "day")?.value;
+
+  if (!y || !m || !d) return false;
   const ymd = `${y}-${m}-${d}`;
 
-  const holidays = getUsMarketHolidays(y);
+  const holidays = getUsMarketHolidays(Number(y));
   return holidays.has(ymd);
 }

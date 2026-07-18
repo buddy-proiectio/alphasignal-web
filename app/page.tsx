@@ -58,7 +58,9 @@ async function ReportViewerContent({
     return (
       <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-600 gap-2">
         <span className="text-3xl">⚠️</span>
-        <p className="text-sm font-medium">리포트 본문 데이터를 가져오지 못했습니다.</p>
+        <p className="text-sm font-medium">
+          리포트 본문 데이터를 가져오지 못했습니다.
+        </p>
       </div>
     );
   }
@@ -77,17 +79,19 @@ interface SignalFrontmatter {
   date?: string;
 }
 
-function formatDateString(ymd: string): string {
-  if (ymd.length !== 8) return ymd;
-  const year = ymd.slice(0, 4);
-  const month = ymd.slice(4, 6);
-  const day = ymd.slice(6, 8);
-  return `${year}-${month}-${day}`;
-}
-
 const getKstDateString = () => {
-  const kst = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
-  return kst.toISOString().split("T")[0]; // YYYY-MM-DD
+  const kstParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const y = kstParts.find(p => p.type === "year")?.value;
+  const m = kstParts.find(p => p.type === "month")?.value;
+  const d = kstParts.find(p => p.type === "day")?.value;
+
+  return `${y}-${m}-${d}`;
 };
 
 function shouldShowFallbackWarning(
@@ -96,19 +100,26 @@ function shouldShowFallbackWarning(
 ): boolean {
   if (hasTodayReport) return false;
 
-  // Get current time in KST (UTC+9)
-  const nowUtc = new Date().getTime();
-  const kstOffset = 9 * 60 * 60 * 1000;
-  const nowKst = new Date(nowUtc + kstOffset);
+  const now = new Date();
 
-  const dayOfWeek = nowKst.getDay(); // 0 = Sunday, 6 = Saturday
-  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const kstDayName = now.toLocaleDateString("en-US", {
+    timeZone: "Asia/Seoul",
+    weekday: "long",
+  });
+  
+  const isWeekend = kstDayName === "Saturday" || kstDayName === "Sunday";
   if (isWeekend) return false;
 
-  if (isUsMarketHoliday(nowKst)) return false;
+  if (isUsMarketHoliday(now)) return false;
 
-  const currentHour = nowKst.getHours();
-  const currentMinute = nowKst.getMinutes();
+  const kstTimeStr = now.toLocaleTimeString("en-US", {
+    timeZone: "Asia/Seoul",
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  
+  const [currentHour, currentMinute] = kstTimeStr.split(":").map(Number);
   const currentTimeVal = currentHour * 60 + currentMinute;
 
   if (activeTab === "alpha") {
@@ -166,7 +177,9 @@ export default async function Home({ searchParams }: PageProps) {
   }
 
   const archiveList = signals.slice(0, 10);
-  const dateYMD = currentSignal ? currentSignal.date.slice(0, 10).replace(/-/g, "") : "";
+  const dateYMD = currentSignal
+    ? currentSignal.date.slice(0, 10).replace(/-/g, "")
+    : "";
 
   return (
     <>
@@ -350,7 +363,7 @@ export default async function Home({ searchParams }: PageProps) {
                       }`}
                     >
                       <time className="block text-[10px] text-slate-400 dark:text-slate-500 mb-0.5">
-                        {formatSignalDate(item.date)}
+                        <LocalDate dateStr={formatSignalDate(item.date)} />
                       </time>
                       <h4 className="text-xs line-clamp-1 leading-snug">
                         {item.title}

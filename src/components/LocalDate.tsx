@@ -4,21 +4,16 @@ import React, { useEffect, useState } from "react";
 import { formatSignalDate } from "@/utils/format-date";
 
 export default function LocalDate({ dateStr }: { dateStr: string }) {
-  const [formatted, setFormatted] = useState("");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setFormatted(formatSignalDate(dateStr));
-  }, [dateStr]);
+    setMounted(true);
+  }, []);
 
-  if (!formatted) {
-    // Hydration-safe initial render (date-only)
-    const dateOnly = dateStr.split("T")[0];
-    const parts = dateOnly.split("-");
-    if (parts.length === 3) {
-      return <span>{`${parts[0]}.${parts[1]}.${parts[2]}.`}</span>;
-    }
-    return <span>{dateStr}</span>;
+  if (!mounted) {
+    // Safe placeholder during hydration to prevent server/client layout mismatches
+    return <span className="opacity-0">0000.00.00.</span>;
   }
 
-  return <span>{formatted}</span>;
+  return <span>{formatSignalDate(dateStr)}</span>;
 }

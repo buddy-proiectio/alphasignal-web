@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import { fetchSignalList } from "@/services/github";
 import { formatSignalDate } from "@/utils/format-date";
 import Link from "next/link";
+import LocalDate from "@/components/LocalDate";
 
 interface PageProps {
   searchParams: Promise<{
@@ -19,7 +20,8 @@ export default async function ArchivePage({ searchParams }: PageProps) {
   const activeTab = resolvedParams.tab === "premarket" ? "premarket" : "alpha";
   const activeLang = resolvedParams.lang === "en" ? "en" : "ko";
   const currentPageInput = Number(resolvedParams.page || 1);
-  const currentPage = isNaN(currentPageInput) || currentPageInput < 1 ? 1 : currentPageInput;
+  const currentPage =
+    isNaN(currentPageInput) || currentPageInput < 1 ? 1 : currentPageInput;
 
   let signals: any[] = [];
   let fetchError = "";
@@ -27,9 +29,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
   try {
     const list = await fetchSignalList();
     const targetCategory =
-      activeTab === "premarket"
-        ? "alpha_signal_premarket"
-        : "alpha_signal";
+      activeTab === "premarket" ? "alpha_signal_premarket" : "alpha_signal";
 
     signals = list.filter(
       (s) => s.category === targetCategory && s.lang === activeLang,
@@ -42,7 +42,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
   const totalItems = signals.length;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  
+
   const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedSignals = signals.slice(startIndex, endIndex);
@@ -52,14 +52,14 @@ export default async function ArchivePage({ searchParams }: PageProps) {
       <Header />
       <main className="max-w-[800px] mx-auto px-6 py-10">
         <div className="flex flex-col gap-6">
-          
           {/* Page Header */}
           <div className="flex flex-col gap-1.5 border-b border-slate-200 dark:border-slate-800 pb-4">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
               📁 전체 리포트 아카이브
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Alpha Signal 및 Premarket 리포트 목록을 페이지별로 열람할 수 있습니다.
+              Alpha Signal 및 Premarket 리포트 목록을 페이지별로 열람할 수
+              있습니다.
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
                         {item.title}
                       </span>
                       <time className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
-                        {formatSignalDate(item.date)}
+                        <LocalDate dateStr={formatSignalDate(item.date)} />
                       </time>
                     </Link>
                   );
@@ -146,7 +146,9 @@ export default async function ArchivePage({ searchParams }: PageProps) {
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-600 gap-2">
                 <span className="text-3xl">📁</span>
-                <p className="text-sm font-medium">아카이브된 리포트가 없습니다.</p>
+                <p className="text-sm font-medium">
+                  아카이브된 리포트가 없습니다.
+                </p>
               </div>
             )}
           </div>
@@ -188,7 +190,6 @@ export default async function ArchivePage({ searchParams }: PageProps) {
               )}
             </div>
           )}
-
         </div>
       </main>
     </>
