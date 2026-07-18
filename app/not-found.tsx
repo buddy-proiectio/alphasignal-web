@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 export const metadata = {
   title: "404 - 페이지를 찾을 수 없습니다 | AlphaSignal",
@@ -9,32 +8,25 @@ export const metadata = {
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center py-12">
-      {/* Cute Mascot Container */}
-      <div className="relative w-64 h-64 sm:w-80 sm:h-80 mb-6">
-        <Image
-          src="/mascot-404.jpg"
-          alt="Alpha Signal Mascot"
-          fill
-          priority
-          sizes="(max-width: 768px) 256px, 320px"
-          className="object-contain rounded-2xl border border-slate-200/50 dark:border-slate-800/80 shadow-md bg-slate-50 dark:bg-slate-900"
-        />
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center py-12">
+      {/* 404 Text Hero */}
+      <h1 className="text-7xl sm:text-8xl font-black text-slate-200 dark:text-slate-800 tracking-wider mb-2 select-none">
+        404
+      </h1>
 
       {/* 404 Error Code chip */}
-      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 mb-4">
-        Error Code: 404
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 mb-6">
+        PAGE NOT FOUND
       </span>
 
       {/* Error message headings */}
-      <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-50 mb-3 tracking-tight">
+      <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-50 mb-3 tracking-tight">
         길을 잃으셨나요?
-      </h1>
+      </h2>
       <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md leading-relaxed mb-8">
         요청하신 페이지가 존재하지 않거나 이전되었을 수 있습니다.
         <br />
-        알파 시그널의 마스코트가 새로운 시장의 신호를 탐색 중입니다!
+        입력하신 웹 주소를 다시 확인해주세요.
       </p>
 
       {/* CTA Actions */}
