@@ -48,17 +48,13 @@ export default function TimeTicker() {
         <span className="text-slate-400 dark:text-slate-500 font-semibold">
           SEL
         </span>
-        <span className="text-slate-700 dark:text-slate-300">
-          {seoulTime}
-        </span>
+        <span className="text-slate-700 dark:text-slate-300">{seoulTime}</span>
       </div>
       <div className="flex items-center gap-1">
         <span className="text-slate-400 dark:text-slate-500 font-semibold">
           NYC
         </span>
-        <span className="text-slate-700 dark:text-slate-300">
-          {nyTime}
-        </span>
+        <span className="text-slate-700 dark:text-slate-300">{nyTime}</span>
       </div>
     </div>
   );

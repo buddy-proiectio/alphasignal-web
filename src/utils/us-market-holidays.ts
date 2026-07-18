@@ -135,9 +135,9 @@ export function isUsMarketHoliday(date: Date): boolean {
     day: "2-digit",
   }).formatToParts(date);
 
-  const y = kstParts.find(p => p.type === "year")?.value;
-  const m = kstParts.find(p => p.type === "month")?.value;
-  const d = kstParts.find(p => p.type === "day")?.value;
+  const y = kstParts.find((p) => p.type === "year")?.value;
+  const m = kstParts.find((p) => p.type === "month")?.value;
+  const d = kstParts.find((p) => p.type === "day")?.value;
 
   if (!y || !m || !d) return false;
   const ymd = `${y}-${m}-${d}`;
