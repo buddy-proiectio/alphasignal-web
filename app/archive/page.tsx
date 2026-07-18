@@ -131,13 +131,20 @@ export default async function ArchivePage({ searchParams }: PageProps) {
                     <Link
                       key={index}
                       href={`/?tab=${activeTab}&lang=${activeLang}&date=${dateYMD}`}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 gap-2 transition-colors"
+                      className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 gap-4 transition-colors"
                     >
-                      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400">
-                        {item.title}
-                      </span>
-                      <time className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">
-                        <LocalDate dateStr={formatSignalDate(item.date)} />
+                      <div className="flex flex-col gap-1 max-w-[550px]">
+                        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                          {item.title}
+                        </span>
+                        {item.excerpt && (
+                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                            {item.excerpt}
+                          </p>
+                        )}
+                      </div>
+                      <time className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap self-start sm:self-center">
+                        <LocalDate dateStr={item.date} />
                       </time>
                     </Link>
                   );
