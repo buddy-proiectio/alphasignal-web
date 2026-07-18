@@ -1,5 +1,5 @@
-import Header from "@/components/Header";
 import Adsense from "@/components/Adsense";
+import Disclaimer from "@/components/Disclaimer";
 import { fetchSignalList, fetchSignalMarkdown } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
 import Link from "next/link";
@@ -182,9 +182,7 @@ export default async function Home({ searchParams }: PageProps) {
     : "";
 
   return (
-    <>
-      <Header />
-      <main className="max-w-[1200px] mx-auto px-6 py-8">
+    <div className="max-w-[1200px] mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
           {/* Left Column: Content Terminal */}
           <div className="flex flex-col gap-6">
@@ -271,13 +269,16 @@ export default async function Home({ searchParams }: PageProps) {
                   <p className="text-sm font-medium">{fetchError}</p>
                 </div>
               ) : currentSignal ? (
-                <Suspense fallback={<ReportSkeleton />}>
-                  <ReportViewerContent
-                    activeLang={activeLang}
-                    activeTab={activeTab}
-                    dateYMD={dateYMD}
-                  />
-                </Suspense>
+                <>
+                  <Suspense fallback={<ReportSkeleton />}>
+                    <ReportViewerContent
+                      activeLang={activeLang}
+                      activeTab={activeTab}
+                      dateYMD={dateYMD}
+                    />
+                  </Suspense>
+                  <Disclaimer />
+                </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-600 gap-2">
                   <span className="text-3xl">📁</span>
@@ -418,7 +419,6 @@ export default async function Home({ searchParams }: PageProps) {
             </div>
           </aside>
         </div>
-      </main>
-    </>
+    </div>
   );
 }

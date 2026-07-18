@@ -1,6 +1,7 @@
 import React from "react";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata = {
@@ -29,9 +30,10 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col">
-            <div className="flex-grow">
+            <Header />
+            <main className="flex-grow">
               {children}
-            </div>
+            </main>
             <Footer />
           </div>
         </ThemeProvider>

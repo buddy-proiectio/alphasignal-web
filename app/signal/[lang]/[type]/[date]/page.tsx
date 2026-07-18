@@ -2,8 +2,8 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { fetchSignalMarkdown, fetchSignalList } from "@/services/github";
 import { compileMDX } from "next-mdx-remote/rsc";
-import Header from "@/components/Header";
 import LocalDate from "@/components/LocalDate";
+import Disclaimer from "@/components/Disclaimer";
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -72,26 +72,24 @@ export default async function SignalDetailPage({ params }: PageProps) {
   });
 
   return (
-    <>
-      <Header />
-      <main className="max-w-[768px] mx-auto px-6 py-10">
-        <header className="mb-10 pb-8 border-b border-slate-200 dark:border-slate-700">
-          <div className="mb-4">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-              {type.toUpperCase()} SIGNAL ({lang.toUpperCase()})
-            </span>
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-3 leading-tight">
-            {frontmatter.title ||
-              `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
-          </h1>
-          <time className="text-slate-500 dark:text-slate-400 text-sm">
-            <LocalDate dateStr={frontmatter.date || date} />
-          </time>
-        </header>
+    <div className="max-w-[768px] mx-auto px-6 py-10">
+      <header className="mb-10 pb-8 border-b border-slate-200 dark:border-slate-700">
+        <div className="mb-4">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+            {type.toUpperCase()} SIGNAL ({lang.toUpperCase()})
+          </span>
+        </div>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-3 leading-tight">
+          {frontmatter.title ||
+            `${type.toUpperCase()} Signal (${lang.toUpperCase()})`}
+        </h1>
+        <time className="text-slate-500 dark:text-slate-400 text-sm">
+          <LocalDate dateStr={frontmatter.date || date} />
+        </time>
+      </header>
 
-        <article className="prose min-h-[200px]">{content}</article>
-      </main>
-    </>
+      <article className="prose min-h-[200px]">{content}</article>
+      <Disclaimer />
+    </div>
   );
 }

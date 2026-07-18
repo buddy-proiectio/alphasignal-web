@@ -1,5 +1,4 @@
 import React from "react";
-import Header from "@/components/Header";
 import { fetchSignalList } from "@/services/github";
 import { formatSignalDate } from "@/utils/format-date";
 import Link from "next/link";
@@ -48,10 +47,8 @@ export default async function ArchivePage({ searchParams }: PageProps) {
   const paginatedSignals = signals.slice(startIndex, endIndex);
 
   return (
-    <>
-      <Header />
-      <main className="max-w-[800px] mx-auto px-6 py-10">
-        <div className="flex flex-col gap-6">
+    <div className="max-w-[800px] mx-auto px-6 py-10">
+      <div className="flex flex-col gap-6">
           {/* Page Header */}
           <div className="flex flex-col gap-1.5 border-b border-slate-200 dark:border-slate-800 pb-4">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-50">
@@ -197,8 +194,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
               )}
             </div>
           )}
-        </div>
-      </main>
-    </>
+      </div>
+    </div>
   );
 }
