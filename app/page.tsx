@@ -341,7 +341,7 @@ export default async function Home({ searchParams }: PageProps) {
         </div>
 
         {/* Right Column: Sidebar (LG screens only) */}
-        <aside className="hidden lg:flex sticky top-24 flex-col gap-6">
+        <aside className="hidden lg:flex sticky top-8 flex-col gap-6">
           {/* Archive Section */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4 flex flex-col gap-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
