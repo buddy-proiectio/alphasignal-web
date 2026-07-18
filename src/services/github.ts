@@ -1,4 +1,3 @@
-import { calcReadingTime } from "@/utils/reading-time";
 import { extractExcerpt } from "@/utils/extract-excerpt";
 
 export interface SignalFrontmatter {
@@ -10,7 +9,6 @@ export interface SignalFrontmatter {
 
 interface SignalListItem extends SignalFrontmatter {
   filename: string;
-  readingMinutes: number;
   excerpt: string;
 }
 
@@ -101,7 +99,6 @@ function buildSignalItem(
     category: (fm.category as SignalFrontmatter["category"]) || defaultCategory,
     lang,
     filename: file,
-    readingMinutes: calcReadingTime(raw, lang),
     excerpt: extractExcerpt(raw),
   };
 }
