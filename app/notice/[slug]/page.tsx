@@ -3,19 +3,14 @@ import fs from "fs/promises";
 import path from "path";
 import { notFound } from "next/navigation";
 import { compileMDX } from "next-mdx-remote/rsc";
+import LocalDate from "@/components/LocalDate";
 
 interface NoticeFrontmatter {
   title?: string;
   date?: string;
 }
 
-function formatNoticeDate(dateStr: string | undefined): string | null {
-  if (!dateStr) return null;
-  const dateObj = new Date(dateStr);
-  const time = dateObj.getTime();
-  if (isNaN(time)) return null;
-  return dateObj.toLocaleString("ko-KR");
-}
+
 
 interface PageProps {
   params: Promise<{
@@ -67,14 +62,11 @@ export default async function NoticeDetailPage({ params }: PageProps) {
         <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-3 leading-tight">
           {frontmatter.title || slug}
         </h1>
-        {(() => {
-          const formattedDate = formatNoticeDate(frontmatter.date);
-          return formattedDate ? (
-            <time className="text-slate-500 dark:text-slate-400 text-sm">
-              {formattedDate}
-            </time>
-          ) : null;
-        })()}
+        {frontmatter.date && (
+          <time className="text-slate-500 dark:text-slate-400 text-sm">
+            <LocalDate dateStr={frontmatter.date} />
+          </time>
+        )}
       </header>
 
       <article className="prose min-h-[200px]">{content}</article>
