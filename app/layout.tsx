@@ -3,6 +3,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Analytics from "@/components/Analytics";
 
 export const metadata = {
   title: {
@@ -69,6 +70,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
+          <Analytics />
           <div className="min-h-screen bg-[--background] text-[--foreground] flex flex-col">
             <Header />
             <main className="grow">{children}</main>
