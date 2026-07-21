@@ -13,7 +13,7 @@ export default function ShareButton({ title }: { title: string }) {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Alpha Signal - ${title}`,
+          title: `Alpha Signals - ${title}`,
           url: shareUrl,
         });
       } catch (err) {
