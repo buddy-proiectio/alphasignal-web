@@ -47,7 +47,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
   const paginatedSignals = signals.slice(startIndex, endIndex);
 
   return (
-    <div className="max-w-[800px] mx-auto px-6 py-10">
+    <div className="max-w-200 mx-auto px-6 py-10">
       <div className="flex flex-col gap-6">
         {/* Page Header */}
         <div className="flex flex-col gap-1.5 border-b border-slate-200 dark:border-slate-800 pb-4">
@@ -130,7 +130,7 @@ export default async function ArchivePage({ searchParams }: PageProps) {
                     href={`/?tab=${activeTab}&lang=${activeLang}&date=${dateYMD}`}
                     className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 gap-4 transition-colors"
                   >
-                    <div className="flex flex-col gap-1 max-w-[550px]">
+                    <div className="flex flex-col gap-1 max-w-137.5">
                       <span className="text-sm font-semibold text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                         {item.title}
                       </span>

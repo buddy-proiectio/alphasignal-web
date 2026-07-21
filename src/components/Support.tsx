@@ -24,7 +24,7 @@ export default function Support({
   };
 
   return (
-    <div className="max-w-[640px] mx-auto flex flex-col gap-12 items-center text-center">
+    <div className="max-w-160 mx-auto flex flex-col gap-12 items-center text-center">
       {/* 1. Main Action Area: Support & Contact */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
         {/* Fairy Support Link */}

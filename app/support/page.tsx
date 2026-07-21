@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function SupportPage() {
   return (
-    <div className="max-w-[896px] mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto px-6 py-12">
       <header className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-50 mb-3">
           Alpha Signals 후원하기

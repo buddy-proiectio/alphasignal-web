@@ -73,7 +73,7 @@ export default async function SignalDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div className="max-w-[768px] mx-auto px-6 py-10">
+    <div className="max-w-3xl mx-auto px-6 py-10">
       <header className="mb-10 pb-8 border-b border-slate-200 dark:border-slate-700">
         <div className="mb-4">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
@@ -97,7 +97,7 @@ export default async function SignalDetailPage({ params }: PageProps) {
         </div>
       </header>
 
-      <article className="prose min-h-[200px]">{content}</article>
+      <article className="prose min-h-50">{content}</article>
       <Disclaimer />
     </div>
   );

@@ -50,7 +50,7 @@ export default async function NoticeDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div className="max-w-[768px] mx-auto px-6 py-10">
+    <div className="max-w-3xl mx-auto px-6 py-10">
       <header className="mb-10 pb-8 border-b border-slate-200 dark:border-slate-700">
         <div className="mb-4">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
@@ -67,7 +67,7 @@ export default async function NoticeDetailPage({ params }: PageProps) {
         )}
       </header>
 
-      <article className="prose min-h-[200px]">{content}</article>
+      <article className="prose min-h-50">{content}</article>
     </div>
   );
 }
