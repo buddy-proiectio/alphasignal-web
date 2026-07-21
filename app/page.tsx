@@ -205,7 +205,7 @@ export default async function Home({ searchParams }: PageProps) {
     : "";
 
   return (
-    <div className="max-w-[1200px] mx-auto px-6 py-8">
+    <div className="max-w-300 mx-auto px-6 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
         {/* Left Column: Content Terminal */}
         <div className="flex flex-col gap-6">
@@ -288,7 +288,7 @@ export default async function Home({ searchParams }: PageProps) {
           )}
 
           {/* Main Article Content */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-6 sm:p-8 min-h-[300px]">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-6 sm:p-8 min-h-75">
             {fetchError ? (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-600 gap-2">
                 <span className="text-3xl">⚠️</span>
@@ -341,7 +341,7 @@ export default async function Home({ searchParams }: PageProps) {
                     <Link
                       key={idx}
                       href={`/?tab=${activeTab}&lang=${activeLang}&date=${itemYMD}`}
-                      className={`flex-none w-[200px] p-3 rounded-lg border snap-start transition-all ${
+                      className={`flex-none w-50 p-3 rounded-lg border snap-start transition-all ${
                         isActive
                           ? "bg-blue-500/10 border-blue-500 dark:border-blue-400 text-blue-900 dark:text-blue-300"
                           : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
