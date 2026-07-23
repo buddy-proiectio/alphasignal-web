@@ -319,7 +319,8 @@ export default async function Home({ searchParams }: PageProps) {
 
           {/* Mobile Bottom Layout (Ad & Archive) */}
           <div className="flex lg:hidden flex-col gap-6 mt-4">
-            <Adsense slot="5806319423" format="auto" />
+            {/* TODO: If google adsense approved, show ads here. */}
+            {/* <Adsense slot="5806319423" format="auto" /> */}
 
             {/* Archive Section */}
             <div className="flex flex-col gap-3">
@@ -417,7 +418,8 @@ export default async function Home({ searchParams }: PageProps) {
 
           {/* Google Adsense Vertical Slot */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4">
-            <Adsense slot="5806319423" format="auto" />
+            {/* TODO: If google adsense approved, show ads here. */}
+            {/* <Adsense slot="5806319423" format="auto" /> */}
           </div>
         </aside>
       </div>
