@@ -10,7 +10,7 @@ export interface SignalListItem extends SignalFrontmatter {
   excerpt: string;
 }
 
-const REPO = "buddy-proiectio/data";
+const REPO = "as-proiectio/data";
 const FETCH_TIMEOUT = 10_000;
 
 function githubFetch(url: string, raw = false): Promise<Response> {
