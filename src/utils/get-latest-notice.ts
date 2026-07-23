@@ -52,11 +52,7 @@ export async function getLatestNotice(): Promise<NoticeItem | null> {
     const notices = noticesResults.filter((n): n is NoticeItem => n !== null);
 
     // Sort notices by date descending
-    notices.sort((a, b) => {
-      const timeA = a.date ? new Date(a.date).getTime() : 0;
-      const timeB = b.date ? new Date(b.date).getTime() : 0;
-      return timeB - timeA;
-    });
+    notices.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 
     return notices[0] || null;
   } catch (err) {
