@@ -11,11 +11,11 @@ interface AdsenseProps {
 }
 
 export default function Adsense({
-  client = "ca-pub-XXXXXXXXXXXXXXXX",
-  slot = "1234567890",
+  client = "ca-pub-3003049022959567",
+  slot,
   format = "auto",
   responsive = "true",
-  style = { display: "block", textAlign: "center" },
+  style = { display: "block" },
 }: AdsenseProps) {
   useEffect(() => {
     try {
@@ -27,49 +27,15 @@ export default function Adsense({
   }, []);
 
   return (
-    <div
-      style={{
-        margin: "1.5rem 0",
-        padding: "1rem",
-        border: "1px dashed hsl(var(--border))",
-        borderRadius: "12px",
-        backgroundColor: "hsl(var(--card) / 0.5)",
-        textAlign: "center",
-        position: "relative",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: "4px",
-          right: "12px",
-          fontSize: "10px",
-          color: "hsl(var(--muted))",
-          letterSpacing: "0.05em",
-          textTransform: "uppercase",
-        }}
-      >
-        ADVERTISEMENT
-      </div>
-      {/* Real ins tag */}
+    <div className="w-full my-4 text-center overflow-hidden min-h-[90px] flex justify-center items-center">
       <ins
         className="adsbygoogle"
         style={style}
         data-ad-client={client}
-        data-ad-slot={slot}
+        {...(slot ? { "data-ad-slot": slot } : {})}
         data-ad-format={format}
         data-full-width-responsive={responsive}
       />
-      {/* Fallback styling placeholder for visual layout */}
-      <div
-        style={{
-          color: "hsl(var(--muted))",
-          fontSize: "12px",
-          padding: "1rem 0",
-        }}
-      >
-        Google AdSense Placeholder (Slot: {slot})
-      </div>
     </div>
   );
 }
