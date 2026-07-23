@@ -7,9 +7,7 @@ interface AnalyticsProps {
   gaId?: string;
 }
 
-export default function Analytics({
-  gaId = "G-YDVSG7Y6XH",
-}: AnalyticsProps) {
+export default function Analytics({ gaId = "G-YDVSG7Y6XH" }: AnalyticsProps) {
   return (
     <>
       <Script
