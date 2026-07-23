@@ -12,7 +12,7 @@ interface AdsenseProps {
 
 export default function Adsense({
   client = "ca-pub-3003049022959567",
-  slot,
+  slot = "5806319423",
   format = "auto",
   responsive = "true",
   style = { display: "block" },
