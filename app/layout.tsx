@@ -13,7 +13,7 @@ export const metadata = {
   },
   description:
     "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 자체 개발 AI 알고리즘이 추출한 미국 주식 매크로 지표, 실시간 주요 외신, SEC 공시 분석을 선제적으로 제공하는 100% 순수 데이터 리포트 매체입니다.",
-  metadataBase: new URL("https://alphasignals.vercel.app"),
+  metadataBase: new URL("https://alphasignals-us.vercel.app"),
   alternates: {
     canonical: "/",
   },
@@ -29,7 +29,7 @@ export const metadata = {
     title: "Alpha Signals - 미국 주식 리포트",
     description:
       "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 광고와 소음이 배제된 미국 주식 1차 출처 데이터 리포트.",
-    url: "https://alphasignals.vercel.app",
+    url: "https://alphasignals-us.vercel.app",
     siteName: "Alpha Signals",
     locale: "ko_KR",
     type: "website",
@@ -45,9 +45,10 @@ export const metadata = {
   twitter: {
     card: "summary",
     title: "Alpha Signals - 미국 주식 리포트",
-    description:
-      "우리는 지속가능하고 깨끗한 금융 정보 제공을 추구합니다. 광고와 소음이 배제된 미국 주식 1차 출처 데이터 리포트.",
     images: ["/logo-light.png"],
+  },
+  other: {
+    "google-adsense-account": "ca-pub-3003049022959567",
   },
 };
 
