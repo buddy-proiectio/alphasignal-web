@@ -416,11 +416,11 @@ export default async function Home({ searchParams }: PageProps) {
             </div>
           </div>
 
+          {/* TODO: If google adsense approved, show ads here. */}
           {/* Google Adsense Vertical Slot */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4">
-            {/* TODO: If google adsense approved, show ads here. */}
-            {/* <Adsense slot="5806319423" format="auto" /> */}
-          </div>
+          {/* <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-xl p-4">
+            <Adsense slot="5806319423" format="auto" />
+          </div> */}
         </aside>
       </div>
     </div>
