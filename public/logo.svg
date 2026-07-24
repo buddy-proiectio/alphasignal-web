@@ -1,27 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- Satellite core body -->
-  <circle cx="256" cy="220" r="48" fill="#4f46e5" />
-  <circle cx="256" cy="220" r="36" fill="#3b82f6" />
-  <circle cx="256" cy="220" r="16" fill="#ffffff" />
-  
   <!-- Left solar panel array -->
-  <rect x="70" y="196" width="100" height="48" rx="8" fill="#1e293b" stroke="#3b82f6" strokeWidth="6" />
-  <line x1="120" y1="196" x2="120" y2="244" stroke="#3b82f6" strokeWidth="4" />
+  <rect x="40" y="82" width="130" height="96" rx="12" fill="#0f172a" stroke="#3b82f6" stroke-width="10" />
+  <line x1="105" y1="82" x2="105" y2="178" stroke="#3b82f6" stroke-width="6" />
+  <line x1="40" y1="130" x2="170" y2="130" stroke="#3b82f6" stroke-width="6" />
   <!-- Connecting arm left -->
-  <rect x="170" y="214" width="38" height="12" fill="#64748b" />
+  <rect x="170" y="118" width="46" height="24" rx="4" fill="#64748b" />
   
   <!-- Right solar panel array -->
-  <rect x="342" y="196" width="100" height="48" rx="8" fill="#1e293b" stroke="#3b82f6" strokeWidth="6" />
-  <line x1="392" y1="196" x2="392" y2="244" stroke="#3b82f6" strokeWidth="4" />
+  <rect x="342" y="82" width="130" height="96" rx="12" fill="#0f172a" stroke="#3b82f6" stroke-width="10" />
+  <line x1="407" y1="82" x2="407" y2="178" stroke="#3b82f6" stroke-width="6" />
+  <line x1="342" y1="130" x2="472" y2="130" stroke="#3b82f6" stroke-width="6" />
   <!-- Connecting arm right -->
-  <rect x="304" y="214" width="38" height="12" fill="#64748b" />
+  <rect x="296" y="118" width="46" height="24" rx="4" fill="#64748b" />
 
-  <!-- Antenna dish at bottom -->
-  <path d="M220 286 C220 310 292 310 292 286 Z" fill="#64748b" />
-  <line x1="256" y1="256" x2="256" y2="286" stroke="#64748b" strokeWidth="8" />
+  <!-- Satellite core body -->
+  <circle cx="256" cy="130" r="64" fill="#4f46e5" />
+  <circle cx="256" cy="130" r="48" fill="#3b82f6" />
+  <circle cx="256" cy="130" r="24" fill="#06b6d4" />
+  <circle cx="256" cy="130" r="10" fill="#ffffff" />
 
-  <!-- Signal waves radiating downwards -->
-  <path d="M220 340 A 50 50 0 0 0 292 340" stroke="#3b82f6" strokeWidth="6" strokeLinecap="round" />
-  <path d="M190 370 A 90 90 0 0 0 322 370" stroke="#4f46e5" strokeWidth="6" strokeLinecap="round" opacity="0.8" />
-  <path d="M160 400 A 130 130 0 0 0 352 400" stroke="#3b82f6" strokeWidth="6" strokeLinecap="round" opacity="0.5" />
+  <!-- Antenna dish & emitter at bottom -->
+  <rect x="244" y="194" width="24" height="32" rx="4" fill="#64748b" />
+  <path d="M190 226 C190 266 322 266 322 226 Z" fill="#475569" stroke="#cbd5e1" stroke-width="6" />
+  <line x1="256" y1="246" x2="256" y2="270" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" />
+
+  <!-- Signal waves radiating downwards (fully centered and unclipped) -->
+  <path d="M210 295 A 60 60 0 0 0 302 295" stroke="#38bdf8" stroke-width="16" stroke-linecap="round" />
+  <path d="M170 340 A 110 110 0 0 0 342 340" stroke="#6366f1" stroke-width="16" stroke-linecap="round" opacity="0.9" />
+  <path d="M130 385 A 160 160 0 0 0 382 385" stroke="#3b82f6" stroke-width="14" stroke-linecap="round" opacity="0.6" />
 </svg>

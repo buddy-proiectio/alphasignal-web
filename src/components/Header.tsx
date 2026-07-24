@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import ThemeToggle from "./ThemeToggle";
 import { getLatestNotice } from "@/utils/get-latest-notice";
 import TimeTicker from "@/components/TimeTicker";
@@ -25,83 +26,14 @@ export default async function Header() {
             href="/"
             className="flex items-center gap-2.5 text-lg font-bold text-slate-900 dark:text-slate-50 tracking-tight group"
           >
-            <svg
+            <Image
+              src="/logo.svg"
+              alt="Alpha Signals Logo"
+              width={24}
+              height={24}
               className="w-6 h-6 transition-transform duration-300 group-hover:rotate-12"
-              viewBox="0 0 512 512"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="256" cy="220" r="48" fill="#4f46e5" />
-              <circle cx="256" cy="220" r="36" fill="#3b82f6" />
-              <circle cx="256" cy="220" r="16" fill="#ffffff" />
-              <rect
-                x="70"
-                y="196"
-                width="100"
-                height="48"
-                rx="8"
-                fill="#1e293b"
-                stroke="#3b82f6"
-                strokeWidth="6"
-              />
-              <line
-                x1="120"
-                y1="196"
-                x2="120"
-                y2="244"
-                stroke="#3b82f6"
-                strokeWidth="4"
-              />
-              <rect x="170" y="214" width="38" height="12" fill="#64748b" />
-              <rect
-                x="342"
-                y="196"
-                width="100"
-                height="48"
-                rx="8"
-                fill="#1e293b"
-                stroke="#3b82f6"
-                strokeWidth="6"
-              />
-              <line
-                x1="392"
-                y1="196"
-                x2="392"
-                y2="244"
-                stroke="#3b82f6"
-                strokeWidth="4"
-              />
-              <rect x="304" y="214" width="38" height="12" fill="#64748b" />
-              <path d="M220 286 C220 310 292 310 292 286 Z" fill="#64748b" />
-              <line
-                x1="256"
-                y1="256"
-                x2="256"
-                y2="286"
-                stroke="#64748b"
-                strokeWidth="8"
-              />
-              <path
-                d="M220 340 A 50 50 0 0 0 292 340"
-                stroke="#3b82f6"
-                strokeWidth="6"
-                strokeLinecap="round"
-              />
-              <path
-                d="M190 370 A 90 90 0 0 0 322 370"
-                stroke="#4f46e5"
-                strokeWidth="6"
-                strokeLinecap="round"
-                opacity="0.8"
-              />
-              <path
-                d="M160 400 A 130 130 0 0 0 352 400"
-                stroke="#3b82f6"
-                strokeWidth="6"
-                strokeLinecap="round"
-                opacity="0.5"
-              />
-            </svg>
+              priority
+            />
             <span>ALPHA SIGNALS</span>
           </Link>
           <nav className="flex items-center gap-4 sm:gap-6">

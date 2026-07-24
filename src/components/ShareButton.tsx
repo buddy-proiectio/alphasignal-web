@@ -33,21 +33,23 @@ export default function ShareButton({ title }: { title: string }) {
   return (
     <button
       onClick={handleShare}
-      className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium cursor-pointer"
+      className="inline-flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium cursor-pointer group"
       title="링크 공유하기"
     >
       <svg
-        className="w-3.5 h-3.5"
+        className="w-3.5 h-3.5 transition-colors"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
         viewBox="0 0 24 24"
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186l5.577-3.253m-5.577 3.253l5.577 3.253m0 0a2.25 2.25 0 103.934 2.186 2.25 2.25 0 00-3.934-2.186zm0-10.912a2.25 2.25 0 103.934-2.186 2.25 2.25 0 00-3.934 2.186z"
-        />
+        <circle cx="18" cy="5" r="3" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
       </svg>
       <span>{copied ? "링크 복사됨!" : "공유"}</span>
     </button>
